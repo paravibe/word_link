@@ -79,7 +79,6 @@ function word_link_admin_settings_submit($form, &$form_state) {
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
   variable_set('word_link_node_types', $form_state['values']['word_link_settings']['word_link_node_types']);
   drupal_set_message(t('Saved'));
-  
 }
 
 /**
