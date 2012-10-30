@@ -160,9 +160,9 @@ function word_link_replace_text($words, $subject) {
             'attributes' => array(
               'class' => $word->class,
               'title' => $word->url_title,
-              'target' => '_blank'
+              'target' => '_blank',
             ),
-            'external' => TRUE
+            'external' => TRUE,
           )
         );
       }
@@ -173,8 +173,8 @@ function word_link_replace_text($words, $subject) {
           array(
             'attributes' => array(
               'class' => $word->class,
-              'title' => $word->url_title
-            )
+              'title' => $word->url_title,
+            ),
           )
         );
       }
@@ -194,9 +194,9 @@ function word_link_replace_text($words, $subject) {
     foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
       if (empty($limit) || $limit > $replace_count) {
         $replaced = preg_replace($search, $replace, $node->wholeText, -1, $count);
-        $newNode = $dom->createDocumentFragment();
-        $newNode->appendXML($replaced);
-        $node->parentNode->replaceChild($newNode, $node);
+        $new_node = $dom->createDocumentFragment();
+        $new_node->appendXML($replaced);
+        $node->parentNode->replaceChild($new_node, $node);
         $replace_count += $count;
       }
     }
