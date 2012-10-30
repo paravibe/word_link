@@ -10,7 +10,7 @@ Main features:
 - Can set the limit of words to be replaced.
 - Can set a list of HTML tags that will be ignored.
 - Can specify case sensitivity.
-- Can set a path on which words will not be.
+- Can set a path on which words will not be replaced.
 
 
 -- REQUIREMENTS --
