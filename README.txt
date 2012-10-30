@@ -27,12 +27,13 @@ PHP 5.
 -- CONFIGURATION --
 
 * Configure user permissions in Administration » People » Permissions:
-  Go to admin/people/permissions and grant permission to any roles that need to be 
-  able to add and edit words.
+  Go to admin/people/permissions and grant permission to any roles
+  that need to be able to add and edit words.
 
 * Configure content types and fields:
   You can set node types, fields and replace limit at
   admin/config/content/word-link.
 
 * Add a new word:
-  Just follow the admin/config/content/word-link/add link and fill out the form.
+  Just follow the admin/config/content/word-link/add 
+  link and fill out the form.
