@@ -10,16 +10,16 @@
 function word_link_permission() {
   return array(
     'view word link' => array(
-      'title' => t('View Word Link')
+      'title' => t('View Word Link'),
     ),
     'create word link' => array(
-      'title' => t('Create Word Link')
+      'title' => t('Create Word Link'),
     ),
     'edit word link' => array(
-      'title' => t('Edit Word Link')
+      'title' => t('Edit Word Link'),
     ),
     'delete word link' => array(
-      'title' => t('Delete Word Link')
+      'title' => t('Delete Word Link'),
     ),
   );
 }
