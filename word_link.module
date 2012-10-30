@@ -152,9 +152,10 @@ function word_link_replace_text($words, $subject) {
     $match = !empty($word->except) ? drupal_match_path($path, drupal_strtolower($word->except)) : FALSE;
     if (drupal_strtolower($word->url) != $path && !$match) {
       // Build a link.
+      $pattern = '\1';
       if (strpos($word->url, 'http://') === 0) {
         $replace[] = l(
-          '\1',
+          $pattern,
           $word->url,
           array(
             'attributes' => array(
@@ -168,7 +169,7 @@ function word_link_replace_text($words, $subject) {
       }
       else {
         $replace[] = l(
-          '\1',
+          $pattern,
           $word->url,
           array(
             'attributes' => array(
