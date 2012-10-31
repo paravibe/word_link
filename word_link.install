@@ -9,9 +9,14 @@
  */
 function word_link_install() {
   $t = get_t();
-  drupal_set_message($t("Word Link module succesfully installed. Configure it here !link",
-    array('!link' => l($t('Administer > Configuration > Content authoring > Word Link'), 'admin/config/content/word-link/configuration'))
-  ));
+  drupal_set_message(
+    $t(
+      'Word Link module succesfully installed. Visit the <a href="@link">configuration page</a>.',
+      array(
+        '@link' => url('admin/config/content/word-link/configuration'),
+      )
+    )
+  );
 }
 
 /**
