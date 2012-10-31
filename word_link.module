@@ -158,11 +158,11 @@ function word_link_replace_text($words, $subject) {
           $pattern,
           check_url($word->url),
           array(
-            'attributes' => array(
+            'attributes' => array_filter(array(
               'class' => check_plain($word->class),
               'title' => check_plain($word->url_title),
               'target' => '_blank',
-            ),
+            )),
             'external' => TRUE,
           )
         );
@@ -172,10 +172,10 @@ function word_link_replace_text($words, $subject) {
           $pattern,
           check_url($word->url),
           array(
-            'attributes' => array(
+            'attributes' => array_filter(array(
               'class' => check_plain($word->class),
               'title' => check_plain($word->url_title),
-            ),
+            )),
           )
         );
       }
