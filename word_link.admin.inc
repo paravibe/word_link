@@ -185,12 +185,12 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
  */
 function word_link_add_form_submit($form, &$form_state) {
   $values = array(
-    'text' => trim($form_state['values']['text']),
+    'text' => check_plain(trim($form_state['values']['text'])),
     'case_sensitive' => $form_state['values']['case_sensitive'],
-    'url' => trim($form_state['values']['url']),
-    'url_title' => trim($form_state['values']['url_title']),
-    'class' => trim($form_state['values']['class']),
-    'except' => trim($form_state['values']['except']),
+    'url' => check_plain(trim($form_state['values']['url'])),
+    'url_title' => check_plain(trim($form_state['values']['url_title'])),
+    'class' => check_plain(trim($form_state['values']['class'])),
+    'except' => check_plain(trim($form_state['values']['except'])),
   );
   if (isset($form_state['values']['id'])) {
     if ($form_state['values']['op'] == 'Delete') {
