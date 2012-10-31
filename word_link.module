@@ -156,11 +156,11 @@ function word_link_replace_text($words, $subject) {
       if (strpos($word->url, 'http://') === 0) {
         $replace[] = l(
           $pattern,
-          $word->url,
+          check_url($word->url),
           array(
             'attributes' => array(
-              'class' => $word->class,
-              'title' => $word->url_title,
+              'class' => check_plain($word->class),
+              'title' => check_plain($word->url_title),
               'target' => '_blank',
             ),
             'external' => TRUE,
@@ -170,26 +170,26 @@ function word_link_replace_text($words, $subject) {
       else {
         $replace[] = l(
           $pattern,
-          $word->url,
+          check_url($word->url),
           array(
             'attributes' => array(
-              'class' => $word->class,
-              'title' => $word->url_title,
+              'class' => check_plain($word->class),
+              'title' => check_plain($word->url_title),
             ),
           )
         );
       }
       if ($word->case_sensitive) {
-        $search[] = '$\b(' . $word->text . ')\b$u';
+        $search[] = '$\b(' . preg_quote($word->text) . ')\b$u';
       }
       else {
-        $search[] = '$\b(' . $word->text . ')\b$ui';
+        $search[] = '$\b(' . preg_quote($word->text) . ')\b$ui';
       }
     }
   }
   if (isset($search) && isset($replace)) {
     $dom = new DOMDocument();
-    $dom->loadHtml(mb_convert_encoding($subject, 'HTML-ENTITIES', "UTF-8"));
+    $dom->loadHtml(mb_convert_encoding($subject, 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($dom);
     $replace_count = 0;
     foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
@@ -203,7 +203,7 @@ function word_link_replace_text($words, $subject) {
     }
     // Get only the body tag with its contents, then trim the body tag
     // itself to get only the original content.
-    $subject = mb_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7, "UTF-8");
+    $subject = mb_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7, 'UTF-8');
   }
 
   return $subject;

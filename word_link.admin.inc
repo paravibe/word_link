@@ -90,9 +90,12 @@ function word_link_list_page() {
   if (!empty($words)) {
     foreach ($words as $delta => $word) {
       settype($word, 'array');
+      $word['text'] = check_plain($word['text']);
       $word['case_sensitive'] = $word['case_sensitive'] ? t('Yes') : t('No');
       $word['url'] = l($word['url'], $word['url'], array('attributes' => array('target' => '_blank')));
-      $word['except'] = str_replace("\n", "| ", $word['except']);
+      $word['url_title'] = check_plain($word['url_title']);
+      $word['class'] = check_plain($word['class']);
+      $word['except'] = str_replace("\n", "| ", check_plain($word['except']));
       $word['edit'] = l(t('edit'), 'admin/config/content/word-link/edit/' . $word['id']);
       $word['delete'] = l(t('delete'), 'admin/config/content/word-link/delete/' . $word['id']);
       $rows[]['data'] = $word;
@@ -185,12 +188,12 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
  */
 function word_link_add_form_submit($form, &$form_state) {
   $values = array(
-    'text' => check_plain(trim($form_state['values']['text'])),
+    'text' => trim($form_state['values']['text']),
     'case_sensitive' => $form_state['values']['case_sensitive'],
-    'url' => check_plain(trim($form_state['values']['url'])),
-    'url_title' => check_plain(trim($form_state['values']['url_title'])),
-    'class' => check_plain(trim($form_state['values']['class'])),
-    'except' => check_plain(trim($form_state['values']['except'])),
+    'url' => trim($form_state['values']['url']),
+    'url_title' => trim($form_state['values']['url_title']),
+    'class' => trim($form_state['values']['class']),
+    'except' => trim($form_state['values']['except']),
   );
   if (isset($form_state['values']['id'])) {
     if ($form_state['values']['op'] == 'Delete') {
