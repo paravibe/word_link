@@ -115,7 +115,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
   if ($view_mode != 'rss') {
     $types = variable_get('word_link_node_types', array());
     if (!empty($types[$node->type]) && $types[$node->type]['status']) {
-      if (!empty($node->content[$types[$node->type]['field']][0]['#markup']) && $node->content[$types[$node->type]['field']]['#items'][0]['format'] != NULL) {
+      if (!empty($node->content[$types[$node->type]['field']][0]['#markup']) && $node->content[$types[$node->type]['field']]['#items'][0]['format'] != 'plain_text') {
         // Get all words from DB.
         $words = word_link_get_link();
         if (!empty($words)) {
