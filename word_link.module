@@ -149,7 +149,7 @@ function word_link_replace_text($words, $subject) {
   $limit = variable_get('word_link_limit', 0);
   $path = drupal_strtolower(drupal_get_path_alias());
   foreach ($words as $word) {
-    $match = !empty($word->except) ? drupal_match_path($path, drupal_strtolower($word->except)) : FALSE;
+    $match = !empty($word->except) ? drupal_match_path($path, drupal_get_path_alias(drupal_strtolower($word->except))) : FALSE;
     if (drupal_strtolower($word->url) != $path && !$match) {
       // Build a link.
       $pattern = '\1';
