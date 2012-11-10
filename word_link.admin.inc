@@ -18,7 +18,7 @@ function word_link_admin_settings() {
   $form['word_link_settings']['word_link_node_types'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node types'),
-    '#description' => t('Choose the node types and field into which Word Link will automatically insert links.'),
+    '#description' => t('Choose the node types and fields into which Word Link will automatically insert links.'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
@@ -32,26 +32,33 @@ function word_link_admin_settings() {
         '#title' => $name,
         '#default_value' => isset($type_defaults[$type]['status']) ? $type_defaults[$type]['status'] : 0,
       );
-      $form['word_link_settings']['word_link_node_types'][$type]['field'] = array(
+      $form['word_link_settings']['word_link_node_types'][$type]['fields'] = array(
         '#type' => 'select',
-        '#title' => t('@type field', array('@type' => $name)),
+        '#title' => t('@type fields', array('@type' => $name)),
         '#options' => $fields,
-        '#default_value' => isset($type_defaults[$type]['field']) ? $type_defaults[$type]['field'] : NULL,
+        '#multiple' => TRUE,
+        '#default_value' => isset($type_defaults[$type]['fields']) ? $type_defaults[$type]['fields'] : NULL,
       );
     }
   }
+  $form['word_link_settings']['word_link_css'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add default CSS'),
+    '#description' => t('If turned on default CSS from module will be added.'),
+    '#default_value' => variable_get('word_link_css', 1),
+  );
   $form['word_link_settings']['word_link_limit'] = array(
     '#type' => 'textfield',
     '#size' => 5,
     '#maxlenghth' => 3,
-    '#title' => t('Replace limit'),
-    '#description' => t('Set the maxium instances that will be replaced. Use 0 if you want all instances in the node to be replaced.'),
+    '#title' => t('Convert limit'),
+    '#description' => t('Set the maxium instances that will be converted. Use 0 if you want all instances in the node to be converted.'),
     '#default_value' => variable_get('word_link_limit', 0),
   );
   $form['word_link_settings']['word_link_tags_except'] = array(
     '#type' => 'textfield',
     '#title' => t('Disallowed HTML tags'),
-    '#description' => t('A list of HTML tags that will be ignored. Never enter here tags that are not text. E.g. <img>.'),
+    '#description' => t('A list of HTML tags that will be ignored. Never enter here tags that are not text. E.g. @tags.', array('@tags' => '<img>')),
     '#default_value' => variable_get('word_link_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6>'),
   );
   $form['word_link_add_form']['save'] = array(
@@ -78,6 +85,7 @@ function word_link_admin_settings_submit($form, &$form_state) {
   variable_set('word_link_limit', $form_state['values']['word_link_settings']['word_link_limit']);
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
   variable_set('word_link_node_types', $form_state['values']['word_link_settings']['word_link_node_types']);
+  variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
   drupal_set_message(t('Saved'));
 }
 
@@ -121,7 +129,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
   }
   $form['word_link_add_form'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Add link'),
+    '#title' => t('Add word'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
