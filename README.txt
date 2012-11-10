@@ -19,7 +19,7 @@ Main features:
 - Can specify case sensitivity.
 - Can set a path on which words will not be converted.
 
-Exaple:
+Example:
 "Nam aliquam egestas congue. Sed at odio odio, quis viverra dolor.
 Vestibulum sed mauris id elit vehicula tincidunt. Integer quis magna
 tortor, non ultrices elit. Nunc quis amet."
