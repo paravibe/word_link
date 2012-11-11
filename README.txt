@@ -18,6 +18,7 @@ Main features:
 - Can set a list of HTML tags that will be ignored.
 - Can specify case sensitivity.
 - Can set a path on which words will not be converted.
+- Works for Cyrillic.
 
 Example:
 "Nam aliquam egestas congue. Sed at odio odio, quis viverra dolor.
