@@ -252,11 +252,11 @@ function word_link_get_link($id = NULL) {
  */
 function word_link_add_update_link($action, $values, $id = NULL) {
   if ($action == 'insert') {
-    drupal_write_record('word_link', &$values);
+    drupal_write_record('word_link', $values);
   }
   elseif ($action == 'update') {
     $values['id'] = $id;
-    drupal_write_record('word_link', &$values, 'id');
+    drupal_write_record('word_link', $values, 'id');
   }
 }
 
