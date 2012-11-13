@@ -215,7 +215,7 @@ function word_link_replace_text($words, $subject) {
     }
     // Get only the body tag with its contents, then trim the body tag
     // itself to get only the original content.
-    $subject = mb_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7, 'UTF-8');
+    $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
   }
 
   return $subject;
