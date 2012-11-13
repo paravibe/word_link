@@ -116,13 +116,13 @@ function word_link_node_view($node, $view_mode, $langcode) {
   if ($view_mode != 'rss') {
     $types = variable_get('word_link_node_types', array());
     // Check the status of current content type.
-    if (!empty($types[$node->type]) && $types[$node->type]['status']) {
-      foreach ($types[$node->type]['fields'] as $field) {
-        // Check if field has some text.
-        if (!empty($node->content[$field]['#items'])) {
-          // Get all words from DB.
-          $words = word_link_get_link();
-          if (!empty($words)) {
+    if (!empty($types[$node->type]['fields']) && $types[$node->type]['status']) {
+      // Get all words from DB.
+      $words = word_link_get_link();
+      if (!empty($words)) {
+        foreach ($types[$node->type]['fields'] as $field) {
+          // Check if field has some text.
+          if (!empty($node->content[$field]['#items'])) {
             foreach ($node->content[$field]['#items'] as $delta => $item) {
               // If output format is not HTML, then don’t do anything.
               if ($item['format'] != 'plain_text') {
@@ -168,11 +168,11 @@ function word_link_replace_text($words, $subject) {
       if (strpos($word->url, 'http://') === 0) {
         $replace[] = l(
           $pattern,
-          check_url($word->url),
+          $word->url,
           array(
             'attributes' => array_filter(array(
-              'class' => check_plain($word->class),
-              'title' => check_plain($word->url_title),
+              'class' => $word->class,
+              'title' => $word->url_title,
               'target' => '_blank',
             )),
             'external' => TRUE,
@@ -182,11 +182,11 @@ function word_link_replace_text($words, $subject) {
       else {
         $replace[] = l(
           $pattern,
-          check_url($word->url),
+          $word->url,
           array(
             'attributes' => array_filter(array(
-              'class' => check_plain($word->class),
-              'title' => check_plain($word->url_title),
+              'class' => $word->class,
+              'title' => $word->url_title,
             )),
           )
         );
@@ -252,10 +252,11 @@ function word_link_get_link($id = NULL) {
  */
 function word_link_add_update_link($action, $values, $id = NULL) {
   if ($action == 'insert') {
-    db_insert('word_link')->fields($values)->execute();
+    drupal_write_record('word_link', &$values);
   }
   elseif ($action == 'update') {
-    db_update('word_link')->fields($values)->condition('id', $id)->execute();
+    $values['id'] = $id;
+    drupal_write_record('word_link', &$values, 'id');
   }
 }
 
