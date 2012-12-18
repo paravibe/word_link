@@ -177,7 +177,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
   }
   if (isset($messages)) {
     foreach ($messages as $item => $message) {
-      form_set_error($item, $message);
+      form_set_error(check_plain($item), filter_xss($message));
     }
   }
 }
