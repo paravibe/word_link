@@ -192,6 +192,18 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
 }
 
 /**
+ * Validate form for add or edit page.
+ */
+function word_link_add_form_validate($form, &$form_state) {
+  $args = arg();
+  $arg = empty($args[5]) ? 0 : $args[5];
+  $exist = word_link_get_link_text(trim($form_state['values']['text']), $arg);
+  if ($exist) {
+    form_set_error('text', t('This word already exists.'));
+  }
+}
+
+/**
  * Submit form for add or edit page.
  */
 function word_link_add_form_submit($form, &$form_state) {
