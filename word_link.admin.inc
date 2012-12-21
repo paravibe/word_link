@@ -119,7 +119,7 @@ function word_link_list_page_form($form, $form_state) {
       'url' => array(
         'data' => array(
           '#type' => 'link',
-          '#title' => $word->url,
+          '#title' => check_plain($word->url),
           '#href' => $word->url,
           '#options' => array('attributes' => array('target' => '_blank')),
         ),
@@ -162,7 +162,7 @@ function word_link_list_page_form($form, $form_state) {
       $options[$word->id]['operations'] = array(
         'data' => array(
           '#type' => 'link',
-          '#title' => $link['title'],
+          '#title' => check_plain($link['title']),
           '#href' => $link['href'],
           '#options' => array('query' => $link['query']),
         ),
