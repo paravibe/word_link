@@ -164,7 +164,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       }
       if (!isset($messages['delimiter_custom'])) {
         foreach ($content as $row) {
-          $row = explode($delimiter, $row);
+          $row = str_getcsv($row, $delimiter);
           if (count($row) == 6) {
             $values[] = $value = array(
               'text' => $row[0],
@@ -176,7 +176,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
             );
           }
           else {
-            $messages['file'] = t('Wrong file.');
+            $messages['file'] = t('Wrong file or delimiter.');
           }
         }
         $form_state['values']['file'] = $values;
@@ -204,7 +204,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
     foreach ($form_state['values']['file'] as $value) {
       $exist = word_link_get_link_text($value['text']);
       if (!$exist) {
-        $value['except'] = str_replace('|', "\n", $value['except']);
+        $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
         $operations[] = array(
           'word_link_exchange_import_add_new',
           array(
@@ -421,7 +421,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
         $string .= $delimiter;
       }
       else {
-        $string .= str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value));
+        $string .= '"' . str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value)) . '"';
         $string .= $line_ending;
       }
     }
