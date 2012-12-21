@@ -92,28 +92,145 @@ function word_link_admin_settings_submit($form, &$form_state) {
 /**
  * Buid a Word Link list page.
  */
-function word_link_list_page() {
-  $words = word_link_get_link();
-  $output = t('No words available.');
-  if (!empty($words)) {
-    foreach ($words as $delta => $word) {
-      settype($word, 'array');
-      $word['text'] = check_plain($word['text']);
-      $word['case_sensitive'] = $word['case_sensitive'] ? t('Yes') : t('No');
-      $word['url'] = l($word['url'], $word['url'], array('attributes' => array('target' => '_blank')));
-      $word['url_title'] = check_plain($word['url_title']);
-      $word['class'] = check_plain($word['class']);
-      $word['except'] = str_replace("\n", "| ", check_plain($word['except']));
-      $word['edit'] = l(t('edit'), 'admin/config/content/word-link/edit/' . $word['id']);
-      $word['delete'] = l(t('delete'), 'admin/config/content/word-link/delete/' . $word['id']);
-      $rows[]['data'] = $word;
-    }
-    $header = array_keys($word);
-    $header = str_replace('_', ' ', $header);
-    $output = theme('table', array('header' => $header, 'rows' => $rows));
+function word_link_list_page_form($form, $form_state) {
+  // Return confirm page when need to delete words.
+  if (!empty($form_state['values']['words'])) {
+    return word_link_list_page_form_delete_confirm($form, $form_state, array_filter($form_state['values']['words']));
   }
+  // Build the sortable table header.
+  $header = array(
+    'text' => array('data' => t('Text'), 'field' => 'wl.text'),
+    'case_sensitive' => array('data' => t('Case sensitive'), 'field' => 'wl.case_sensitive'),
+    'url' => array('data' => t('URL'), 'field' => 'wl.url'),
+    'url_title' => array('data' => t('URL Title'), 'field' => 'wl.url_title'),
+    'class' => array('data' => t('Class'), 'field' => 'wl.class'),
+    'except' => array('data' => t('Except'), 'field' => 'wl.except'),
+    'operations' => array('data' => t('Operations')),
+  );
+  // Get words from DB.
+  $words = word_link_get_link(NULL, $header, 50);
 
-  return $output;
+  $destination = drupal_get_destination();
+  $options = array();
+  foreach ($words as $delta => $word) {
+    $options[$word->id] = array(
+      'text' => check_plain($word->text),
+      'case_sensitive' => $word->case_sensitive ? t('Yes') : t('No'),
+      'url' => array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $word->url,
+          '#href' => $word->url,
+          '#options' => array('attributes' => array('target' => '_blank')),
+        ),
+      ),
+      'url_title' => check_plain($word->url_title),
+      'class' => check_plain($word->class),
+      'except' => str_replace(array("\r\n", "\n", "\r"), " | ", check_plain(trim($word->except))),
+    );
+
+    // Build a list of all the accessible operations for the current word.
+    $operations = array();
+    if (user_access('edit word link')) {
+      $operations['edit'] = array(
+        'title' => t('edit'),
+        'href' => 'admin/config/content/word-link/edit/' . $word->id,
+        'query' => $destination,
+      );
+    }
+    if (user_access('delete word link')) {
+      $operations['delete'] = array(
+        'title' => t('delete'),
+        'href' => 'admin/config/content/word-link/delete/' . $word->id,
+        'query' => $destination,
+      );
+    }
+    $options[$word->id]['operations'] = array();
+    if (count($operations) > 1) {
+      // Render an unordered list of operations links.
+      $options[$word->id]['operations'] = array(
+        'data' => array(
+          '#theme' => 'links__node_operations',
+          '#links' => $operations,
+          '#attributes' => array('class' => array('links', 'inline')),
+        ),
+      );
+    }
+    elseif (!empty($operations)) {
+      // Render the first and only operation as a link.
+      $link = reset($operations);
+      $options[$word->id]['operations'] = array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $link['title'],
+          '#href' => $link['href'],
+          '#options' => array('query' => $link['query']),
+        ),
+      );
+    }
+  }
+  // Only use a tableselect when the current user is able to perform any
+  // operations.
+  if (user_access('view word link')) {
+    $form['words'] = array(
+      '#type' => 'tableselect',
+      '#header' => $header,
+      '#options' => $options,
+      '#empty' => t('No words available.'),
+    );
+  }
+  // Otherwise, use a simple table.
+  else {
+    $form['words'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $options,
+      '#empty' => t('No words available.'),
+    );
+  }
+  if (!empty($options)) {
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete selected'),
+    );
+  }
+  $form['pager'] = array('#markup' => theme('pager'));
+
+  return $form;
+}
+
+/**
+ * Submit for a Word Link list page.
+ */
+function word_link_list_page_form_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Confirm form for delete operation.
+ */
+function word_link_list_page_form_delete_confirm($form, &$form_state, $words) {
+  $form['words']['#tree'] = TRUE;
+  foreach ($words as $wid) {
+    $form['words'][$wid] = array(
+      '#type' => 'hidden',
+      '#value' => $wid,
+    );
+  }
+  $form['#submit'][] = 'word_link_list_page_form_delete_confirm_submit';
+  $confirm_question = format_plural(count($words), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
+  return confirm_form($form, $confirm_question, 'admin/config/content/word-link/list', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+}
+
+/**
+ * Submit for delete operation.
+ */
+function word_link_list_page_form_delete_confirm_submit($form, &$form_state) {
+  foreach ($form_state['values']['words'] as $wid) {
+    if (!empty($wid) && is_numeric($wid)) {
+      word_link_del_link($wid);
+    }
+  }
 }
 
 /**

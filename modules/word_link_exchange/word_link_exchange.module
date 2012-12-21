@@ -204,6 +204,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
     foreach ($form_state['values']['file'] as $value) {
       $exist = word_link_get_link_text($value['text']);
       if (!$exist) {
+        $value['except'] = str_replace('|', "\n", $value['except']);
         $operations[] = array(
           'word_link_exchange_import_add_new',
           array(
@@ -399,8 +400,31 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
       'filesize' => filesize($filename),
     );
   }
+  else {
+    drupal_set_message(t('The file could not be created.'), 'error');
+    return;
+  }
+  $operations = array();
   foreach ($links as $link) {
-    $string = $link->text . $delimiter . $link->case_sensitive . $delimiter . $link->url . $delimiter . $link->url_title . $delimiter . $link->class . $delimiter . '' . $line_ending;
+    $values = array(
+      'text',
+      'case_sensitive',
+      'url',
+      'url_title',
+      'class',
+      'except',
+    );
+    $string = '';
+    foreach ($values as $value) {
+      if ($value != 'except') {
+        $string .= $link->$value;
+        $string .= $delimiter;
+      }
+      else {
+        $string .= str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value));
+        $string .= $line_ending;
+      }
+    }
     $operations[] = array(
       'word_link_exchange_write_file',
       array(
@@ -436,7 +460,10 @@ function word_link_exchange_write_file($string, $file, &$context) {
  * Batch export finish.
  */
 function word_link_exchange_export_batch_finish($success, $results, $operations) {
-  if ($success) {
+  if (empty($results['total'])) {
+    $message = t('There is nothing to export.');
+  }
+  elseif ($success && !empty($results['total'])) {
     $file = $results['file'];
     $message = t('@count words have been exported to file !link (!filesize). Click on link to view it or right click to download it.', array(
       '@count' => count($results['total']),

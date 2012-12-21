@@ -2,3 +2,4 @@ name = Word Link exchange
 description = Provides a possibility to import/export words.
 core = 7.x
 dependencies[] = word_link
+dependencies[] = taxonomy
