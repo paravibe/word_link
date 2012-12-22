@@ -160,6 +160,7 @@ function word_link_replace_text($words, $subject) {
   }
   // Get word link limit.
   $limit = variable_get('word_link_limit', 0);
+  $preg_limit = $limit == 0 ? -1 : $limit;
   $path = drupal_strtolower(drupal_get_path_alias());
   foreach ($words as $word) {
     $match = !empty($word->except) ? drupal_match_path($path, drupal_get_path_alias(drupal_strtolower($word->except))) : FALSE;
@@ -208,7 +209,7 @@ function word_link_replace_text($words, $subject) {
     $replace_count = 0;
     foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
       if (empty($limit) || $limit > $replace_count) {
-        $replaced = preg_replace($search, $replace, $node->wholeText, -1, $count);
+        $replaced = preg_replace($search, $replace, $node->wholeText, $preg_limit, $count);
         $new_node = $dom->createDocumentFragment();
         $new_node->appendXML($replaced);
         $node->parentNode->replaceChild($new_node, $node);
