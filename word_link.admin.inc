@@ -23,9 +23,23 @@ function word_link_admin_settings() {
     '#collapsed' => FALSE,
   );
   $node_types = node_type_get_names();
+  $type_defaults = variable_get('word_link_node_types', array());
+  foreach ($type_defaults as $content => $type) {
+    $types = array();
+    foreach ($type['fields'] as $name => $field) {
+      if (!is_array($field)) {
+        $types[$field] = $field;
+      }
+      else {
+        foreach ($field as $fc_field) {
+          $types[$name . '__' . $fc_field] = $name . '__' . $fc_field;
+        }
+      }
+    }
+    $type_defaults[$content]['fields'] = isset($types) ? $types : array();
+  }
   foreach ($node_types as $type => $name) {
     $fields = word_link_get_node_fields($type);
-    $type_defaults = variable_get('word_link_node_types', array());
     if (!empty($fields)) {
       $form['word_link_settings']['word_link_node_types'][$type]['status'] = array(
         '#type' => 'checkbox',
@@ -37,6 +51,7 @@ function word_link_admin_settings() {
         '#title' => t('@type fields', array('@type' => $name)),
         '#options' => $fields,
         '#multiple' => TRUE,
+        '#tree' => TRUE,
         '#default_value' => isset($type_defaults[$type]['fields']) ? $type_defaults[$type]['fields'] : NULL,
       );
     }
@@ -82,9 +97,23 @@ function word_link_admin_settings_validate($form, &$form_state) {
  * Submit form for a settings page.
  */
 function word_link_admin_settings_submit($form, &$form_state) {
+  $types = $form_state['values']['word_link_settings']['word_link_node_types'];
+  foreach ($form_state['values']['word_link_settings']['word_link_node_types'] as $content => $type) {
+    $fields = array();
+    foreach ($type['fields'] as $field) {
+      if (preg_match('/.+__.+/', $field) != 0) {
+        $fc = explode('__', $field);
+        $fields[$fc[0]][$fc[1]] = $fc[1];
+      }
+      else {
+        $fields[$field] = $field;
+      }
+    }
+    $types[$content]['fields'] = $fields;
+  }
   variable_set('word_link_limit', $form_state['values']['word_link_settings']['word_link_limit']);
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
-  variable_set('word_link_node_types', $form_state['values']['word_link_settings']['word_link_node_types']);
+  variable_set('word_link_node_types', $types);
   variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
   drupal_set_message(t('Saved'));
 }

@@ -121,18 +121,38 @@ function word_link_node_view($node, $view_mode, $langcode) {
       // Get all words from DB.
       $words = word_link_get_link();
       if (!empty($words)) {
-        foreach ($types[$node->type]['fields'] as $field) {
-          // Check if field has some text.
-          if (!empty($node->content[$field]['#items'])) {
-            foreach ($node->content[$field]['#items'] as $delta => $item) {
-              // If output format is not HTML, then don’t do anything.
-              if ($item['format'] != 'plain_text') {
-                $css_status = variable_get('word_link_css', 1);
-                if ($css_status) {
-                  drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+        $css_status = variable_get('word_link_css', 1);
+        if ($css_status) {
+          drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+        }
+        foreach ($types[$node->type]['fields'] as $field_name => $field) {
+          if (!is_array($field)) {
+            // Check if field has some text.
+            if (!empty($node->content[$field]['#items'])) {
+              foreach ($node->content[$field]['#items'] as $delta => $item) {
+                // If output format is not HTML, then don’t do anything.
+                if ($item['format'] != 'plain_text') {
+                  // Change field value.
+                  $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup']);
                 }
-                // Change field value.
-                $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup'], NULL);
+              }
+            }
+          }
+          else {
+            // Process field collection.
+            foreach ($field as $fc) {
+              if (!empty($node->content[$field_name]['#items'])) {
+                foreach ($node->content[$field_name]['#items'] as $fc_delta => $fc_item) {
+                  if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
+                    $field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
+                    foreach ($field['#items'] as $fc_field_delta => $fc_field_value) {
+                      if ($fc_field_value['format'] != 'plain_text') {
+                        $value = word_link_replace_text($words, $field[$fc_field_delta]['#markup']);
+                        $field[$fc_field_delta]['#markup'] = $value;
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -313,6 +333,14 @@ function word_link_get_node_fields($type) {
   foreach ($fields as $name => $field) {
     if ($field['widget']['type'] == 'text_textarea_with_summary' || $field['widget']['type'] == 'text_textarea') {
       $text_fields[$field['field_name']] = $field['label'];
+    }
+    elseif ($field['widget']['type'] == 'field_collection_embed') {
+      $fc_fields = field_info_instances('field_collection_item', $field['field_name']);
+      foreach ($fc_fields as $fc_name => $fc_field) {
+        if ($fc_field['widget']['type'] == 'text_textarea_with_summary' || $fc_field['widget']['type'] == 'text_textarea') {
+          $text_fields[$field['field_name']][$field['field_name'] . '__' . $fc_field['field_name']] = $fc_field['label'];
+        }
+      }
     }
   }
 
