@@ -224,7 +224,8 @@ function word_link_replace_text($words, $subject) {
   if (isset($search) && isset($replace)) {
     $dom = new DOMDocument();
     $subject = str_replace('&amp;', '&#38;#38;', preg_replace('/&(?![a-z])/u', '&amp;', $subject));
-    $dom->loadHtml(mb_convert_encoding($subject, 'HTML-ENTITIES', 'UTF-8'));
+    libxml_use_internal_errors(TRUE);
+    $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($dom);
     $replace_count = 0;
     foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
@@ -241,7 +242,7 @@ function word_link_replace_text($words, $subject) {
     $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
   }
 
-  return htmlspecialchars_decode($subject);
+  return $subject;
 }
 
 /**
