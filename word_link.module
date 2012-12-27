@@ -186,7 +186,7 @@ function word_link_replace_text($words, $subject) {
     $match = !empty($word->except) ? drupal_match_path($path, drupal_get_path_alias(drupal_strtolower($word->except))) : FALSE;
     if (drupal_strtolower($word->url) != $path && !$match) {
       // Build a link.
-      $pattern = '\1';
+      $pattern = '$0';
       if (strpos($word->url, 'http://') === 0) {
         $replace[] = l(
           $pattern,
@@ -214,10 +214,10 @@ function word_link_replace_text($words, $subject) {
         );
       }
       if ($word->case_sensitive) {
-        $search[] = '$\b(' . preg_quote($word->text) . ')\b$u';
+        $search[] = '/(?<=\\W)(' . preg_quote($word->text) . ')\b/u';
       }
       else {
-        $search[] = '$\b(' . preg_quote($word->text) . ')\b$ui';
+        $search[] = '/(?<=\\W)(' . preg_quote($word->text) . ')\b/ui';
       }
     }
   }
