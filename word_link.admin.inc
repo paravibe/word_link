@@ -200,7 +200,7 @@ function word_link_list_page_form($form, $form_state) {
   }
   // Only use a tableselect when the current user is able to perform any
   // operations.
-  if (user_access('view word link')) {
+  if (user_access('delete word link')) {
     $form['words'] = array(
       '#type' => 'tableselect',
       '#header' => $header,
@@ -217,7 +217,7 @@ function word_link_list_page_form($form, $form_state) {
       '#empty' => t('No words available.'),
     );
   }
-  if (!empty($options)) {
+  if (!empty($options) && user_access('delete word link')) {
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Delete selected'),

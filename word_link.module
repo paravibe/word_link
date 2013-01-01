@@ -131,7 +131,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
             if (!empty($node->content[$field]['#items'])) {
               foreach ($node->content[$field]['#items'] as $delta => $item) {
                 // If output format is not HTML, then don’t do anything.
-                if ($item['format'] != 'plain_text') {
+                if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
                   // Change field value.
                   $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup']);
                 }
@@ -146,7 +146,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
                   if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
                     $field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
                     foreach ($field['#items'] as $fc_field_delta => $fc_field_value) {
-                      if ($fc_field_value['format'] != 'plain_text') {
+                      if ($fc_field_value['format'] != 'plain_text' && !empty($field[$fc_field_delta]['#markup'])) {
                         $value = word_link_replace_text($words, $field[$fc_field_delta]['#markup']);
                         $field[$fc_field_delta]['#markup'] = $value;
                       }
