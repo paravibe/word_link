@@ -213,11 +213,12 @@ function word_link_replace_text($words, $subject) {
           )
         );
       }
+      $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text) . ')(?!.*(<\/a>)|(".*>))\b/u';
       if ($word->case_sensitive) {
-        $search[] = '/(?<=\\W)(' . preg_quote($word->text) . ')\b/u';
+        $search[] = $pattern;
       }
       else {
-        $search[] = '/(?<=\\W)(' . preg_quote($word->text) . ')\b/ui';
+        $search[] = $pattern . 'i';
       }
     }
   }
