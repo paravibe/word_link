@@ -187,7 +187,7 @@ function word_link_replace_text($words, $subject) {
     if (drupal_strtolower($word->url) != $path && !$match) {
       // Build a link.
       $pattern = '$0';
-      if (strpos($word->url, 'http://') === 0) {
+      if (strpos($word->url, 'http://') === 0 || strpos($word->url, 'https://') === 0) {
         $replace[] = l(
           $pattern,
           $word->url,
