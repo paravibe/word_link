@@ -46,16 +46,12 @@ function word_link_exchange_cron() {
 }
 
 /**
- * Import taxonomy to word link.
+ * Import form.
  */
 function word_link_exchange_import_form() {
   $vocabularies = taxonomy_get_vocabularies();
   $form = array();
 
-  $vids = array();
-  foreach ($vocabularies as $vocabulary) {
-    $vids[$vocabulary->vid] = $vocabulary->name . ' (vid:' . $vocabulary->vid . ')';
-  }
   $delimiter = array(
     'semicolon' => t('« ; » (Semicolon)'),
     'comma' => t('« , » (Comma)'),
@@ -66,18 +62,24 @@ function word_link_exchange_import_form() {
     'custom_delimiter' => t('Custom delimiter'),
   );
 
-  $form['taxonomy'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Import from taxonomy'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['taxonomy']['vocabularies'] = array(
-    '#type' => 'select',
-    '#title' => t('Select vocabularies'),
-    '#options' => $vids,
-    '#multiple' => TRUE,
-  );
+  if (!empty($vocabularies)) {
+    $vids = array();
+    foreach ($vocabularies as $vocabulary) {
+      $vids[$vocabulary->vid] = $vocabulary->name . ' (vid:' . $vocabulary->vid . ')';
+    }
+    $form['taxonomy'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Import from taxonomy'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['taxonomy']['vocabularies'] = array(
+      '#type' => 'select',
+      '#title' => t('Select vocabularies'),
+      '#options' => $vids,
+      '#multiple' => TRUE,
+    );
+  }
 
   $form['import'] = array(
     '#type' => 'fieldset',
@@ -93,7 +95,7 @@ function word_link_exchange_import_form() {
   );
   $form['import']['delimiter'] = array(
     '#type' => 'select',
-    '#title' => t('Delimeter'),
+    '#title' => t('Delimiter'),
     '#options' => $delimiter,
   );
   $form['import']['delimiter_custom'] = array(
