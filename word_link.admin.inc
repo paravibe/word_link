@@ -133,7 +133,7 @@ function word_link_list_page_form($form, $form_state) {
     'url' => array('data' => t('URL'), 'field' => 'wl.url'),
     'url_title' => array('data' => t('URL Title'), 'field' => 'wl.url_title'),
     'class' => array('data' => t('Class'), 'field' => 'wl.class'),
-    'except' => array('data' => t('Except'), 'field' => 'wl.except'),
+    'except' => array('data' => t('Visibility'), 'field' => 'wl.except'),
     'operations' => array('data' => t('Operations')),
   );
   // Get words from DB.
@@ -142,6 +142,10 @@ function word_link_list_page_form($form, $form_state) {
   $destination = drupal_get_destination();
   $options = array();
   foreach ($words as $delta => $word) {
+    $visibility = '';
+    if (!empty($word->except)) {
+      $visibility = $word->visibility ? t('Only on') . ': ' : t('Except') . ': ';
+    }
     $options[$word->id] = array(
       'text' => check_plain($word->text),
       'case_sensitive' => $word->case_sensitive ? t('Yes') : t('No'),
@@ -155,7 +159,7 @@ function word_link_list_page_form($form, $form_state) {
       ),
       'url_title' => check_plain($word->url_title),
       'class' => check_plain($word->class),
-      'except' => str_replace(array("\r\n", "\n", "\r"), " | ", check_plain(trim($word->except))),
+      'except' => $visibility . str_replace(array("\r\n", "\n", "\r"), " | ", check_plain(trim($word->except))),
     );
 
     // Build a list of all the accessible operations for the current word.
@@ -299,7 +303,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#title' => t('URL'),
     '#size' => 30,
     '#maxlength' => 255,
-    '#description' => t('The URL of the page to link to. External links must include "http://"'),
+    '#description' => t('The URL of the page to link to. External links must start with %http or %https and will be open in new window.', array('%http' => 'http://', '%https' => 'https://')),
     '#required' => TRUE,
     '#default_value' => isset($defaults[$id]->url) ? $defaults[$id]->url : '',
   );
@@ -319,9 +323,17 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#description' => t('Use this to add a class for the link. Default value is "word-link".'),
     '#default_value' => isset($defaults[$id]->class) ? $defaults[$id]->class : 'word-link',
   );
+  $form['word_link_add_form']['visibility'] = array(
+    '#type' => 'radios',
+    '#title' => t('Show links on specific pages'),
+    '#options' => array(
+      0 => t('All pages except those listed'),
+      1 => t('Only the listed pages'),
+    ),
+    '#default_value' => isset($defaults[$id]->visibility) ? $defaults[$id]->visibility : 0,
+  );
   $form['word_link_add_form']['except'] = array(
     '#type' => 'textarea',
-    '#title' => t('Do not show links on specific pages'),
     '#description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
     '#default_value' => isset($defaults[$id]->except) ? $defaults[$id]->except : '',
   );
@@ -347,6 +359,9 @@ function word_link_add_form_validate($form, &$form_state) {
   if ($exist) {
     form_set_error('text', t('This word already exists.'));
   }
+  if (!drupal_valid_path($form_state['values']['url'])) {
+    form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
+  }
 }
 
 /**
@@ -359,6 +374,7 @@ function word_link_add_form_submit($form, &$form_state) {
     'url' => trim($form_state['values']['url']),
     'url_title' => trim($form_state['values']['url_title']),
     'class' => trim($form_state['values']['class']),
+    'visibility' => $form_state['values']['visibility'],
     'except' => trim($form_state['values']['except']),
   );
   if (isset($form_state['values']['id'])) {

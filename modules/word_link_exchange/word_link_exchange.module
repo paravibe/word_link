@@ -167,14 +167,15 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       if (!isset($messages['delimiter_custom'])) {
         foreach ($content as $row) {
           $row = str_getcsv($row, $delimiter);
-          if (count($row) == 6) {
+          if (count($row) == 7) {
             $values[] = $value = array(
               'text' => $row[0],
               'case_sensitive' => $row[1],
               'url' => $row[2],
               'url_title' => $row[3],
               'class' => $row[4],
-              'except' => $row[5],
+              'visibility' => $row[5],
+              'except' => $row[6],
             );
           }
           else {
@@ -228,6 +229,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
             'case_sensitive' => 1,
             'url' => 'taxonomy/term/' . $term->tid,
             'url_title' => $term->name,
+            'visibility' => 0,
             'except' => NULL,
           );
           $operations[] = array(
@@ -414,6 +416,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
       'url',
       'url_title',
       'class',
+      'visibility',
       'except',
     );
     $string = '';

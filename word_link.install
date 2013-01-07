@@ -70,6 +70,12 @@ function word_link_schema() {
         'not null' => TRUE,
         'default' => 'word-link',
       ),
+      'visibility' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
       'except' => array(
         'type' => 'text',
         'length' => 255,
@@ -79,4 +85,21 @@ function word_link_schema() {
     'primary key' => array('id'),
   );
   return $schema;
+}
+
+/**
+ * Adding visibility field.
+ */
+function word_link_update_7001() {
+  // Add the visibility field to the db.
+  if (!db_field_exists('word_link', 'visibility')) {
+    db_add_field('word_link', 'visibility',
+      array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      )
+    );
+  }
 }

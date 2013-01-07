@@ -182,9 +182,18 @@ function word_link_replace_text($words, $subject) {
   $limit = variable_get('word_link_limit', 0);
   $preg_limit = $limit == 0 ? -1 : $limit;
   $path = drupal_strtolower(drupal_get_path_alias());
+  $current_path = current_path();
   foreach ($words as $word) {
-    $match = !empty($word->except) ? drupal_match_path($path, drupal_get_path_alias(drupal_strtolower($word->except))) : FALSE;
-    if (drupal_strtolower($word->url) != $path && !$match) {
+    $url = drupal_get_path_alias($word->url);
+    $match = FALSE;
+    if (!empty($word->except)) {
+      $match = drupal_match_path($path, $word->except);
+      if ($path != $current_path) {
+        $match = $match || drupal_match_path($current_path, $word->except);
+      }
+    }
+    $visibility = empty($word->except) ? FALSE : $word->visibility;
+    if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
       // Build a link.
       $pattern = '$0';
       if (strpos($word->url, 'http://') === 0 || strpos($word->url, 'https://') === 0) {
