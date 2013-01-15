@@ -270,19 +270,20 @@ function word_link_list_page_form_delete_confirm_submit($form, &$form_state) {
  * Form builder for add or edit page.
  */
 function word_link_add_form($form, &$form_state, $id = NULL) {
-  if (!empty($id)) {
-    $defaults = word_link_get_link($id);
-    $form['word_link_add_form']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
-    );
-  }
   $form['word_link_add_form'] = array(
     '#type' => 'fieldset',
     '#title' => t('Add word'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
+  if (!empty($id)) {
+    $defaults = word_link_get_link($id);
+    $form['word_link_add_form']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+      '#weight' => 15,
+    );
+  }
   $form['word_link_add_form']['text'] = array(
     '#type' => 'textfield',
     '#title' => t('Word/Phrase'),
@@ -353,14 +354,16 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
  * Validate form for add or edit page.
  */
 function word_link_add_form_validate($form, &$form_state) {
-  $args = arg();
-  $arg = empty($args[5]) ? 0 : $args[5];
-  $exist = word_link_get_link_text(trim($form_state['values']['text']), $arg);
-  if ($exist) {
-    form_set_error('text', t('This word already exists.'));
-  }
-  if (!drupal_valid_path($form_state['values']['url'])) {
-    form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
+  if ($form_state['values']['op'] == t('Save')) {
+    $args = arg();
+    $arg = empty($args[5]) ? 0 : $args[5];
+    $exist = word_link_get_link_text(trim($form_state['values']['text']), $arg);
+    if ($exist) {
+      form_set_error('text', t('This word already exists.'));
+    }
+    if (!drupal_valid_path($form_state['values']['url'])) {
+      form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
+    }
   }
 }
 
@@ -378,10 +381,10 @@ function word_link_add_form_submit($form, &$form_state) {
     'except' => trim($form_state['values']['except']),
   );
   if (isset($form_state['values']['id'])) {
-    if ($form_state['values']['op'] == 'Delete') {
+    if ($form_state['values']['op'] == t('Delete')) {
       word_link_del_link($form_state['values']['id']);
     }
-    elseif ($form_state['values']['op'] == 'Save') {
+    elseif ($form_state['values']['op'] == t('Save')) {
       word_link_add_update_link('update', $values, $form_state['values']['id']);
     }
     drupal_set_message(t('Done'));
