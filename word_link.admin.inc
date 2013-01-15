@@ -122,10 +122,6 @@ function word_link_admin_settings_submit($form, &$form_state) {
  * Buid a Word Link list page.
  */
 function word_link_list_page_form($form, $form_state) {
-  // Return confirm page when need to delete words.
-  if (!empty($form_state['values']['words'])) {
-    return word_link_list_page_form_delete_confirm($form, $form_state, array_filter($form_state['values']['words']));
-  }
   // Build the sortable table header.
   $header = array(
     'text' => array('data' => t('Text'), 'field' => 'wl.text'),
@@ -233,13 +229,6 @@ function word_link_list_page_form($form, $form_state) {
 }
 
 /**
- * Submit for a Word Link list page.
- */
-function word_link_list_page_form_submit($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
  * Confirm form for delete operation.
  */
 function word_link_list_page_form_delete_confirm($form, &$form_state, $words) {
@@ -282,6 +271,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
       '#type' => 'submit',
       '#value' => t('Delete'),
       '#weight' => 15,
+      '#submit' => array('word_link_add_form_delete_submit'),
     );
   }
   $form['word_link_add_form']['text'] = array(
@@ -345,6 +335,8 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
   $form['word_link_add_form']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 15,
+    '#submit' => array('word_link_add_form_save_submit'),
   );
 
   return $form;
@@ -368,9 +360,21 @@ function word_link_add_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit form for add or edit page.
+ * Submit for delete action.
  */
-function word_link_add_form_submit($form, &$form_state) {
+function word_link_add_form_delete_submit($form, &$form_state) {
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = drupal_get_destination();
+    unset($_GET['destination']);
+  }
+  $form_state['redirect'] = array('admin/config/content/word-link/delete/' . $form_state['values']['id'], array('query' => $destination));
+}
+
+/**
+ * Submit for save action.
+ */
+function word_link_add_form_save_submit($form, &$form_state) {
   $values = array(
     'text' => trim($form_state['values']['text']),
     'case_sensitive' => $form_state['values']['case_sensitive'],
@@ -381,12 +385,7 @@ function word_link_add_form_submit($form, &$form_state) {
     'except' => trim($form_state['values']['except']),
   );
   if (isset($form_state['values']['id'])) {
-    if ($form_state['values']['op'] == t('Delete')) {
-      word_link_del_link($form_state['values']['id']);
-    }
-    elseif ($form_state['values']['op'] == t('Save')) {
-      word_link_add_update_link('update', $values, $form_state['values']['id']);
-    }
+    word_link_add_update_link('update', $values, $form_state['values']['id']);
     drupal_set_message(t('Done'));
   }
   else {
