@@ -18,7 +18,7 @@ function word_link_admin_settings() {
   $form['word_link_settings']['word_link_node_types'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node types'),
-    '#description' => t('Choose the node types and fields into which Word Link will automatically insert links.'),
+    '#description' => t('Choose the fields into which Word Link will automatically insert links.'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
@@ -41,18 +41,23 @@ function word_link_admin_settings() {
   foreach ($node_types as $type => $name) {
     $fields = word_link_get_node_fields($type);
     if (!empty($fields)) {
-      $form['word_link_settings']['word_link_node_types'][$type]['status'] = array(
-        '#type' => 'checkbox',
+      if (module_exists('comment')) {
+        $fields['comments'] = t('Comments');
+      }
+      $default_values = isset($type_defaults[$type]['fields']) ? $type_defaults[$type]['fields'] : array();
+      $default_values = is_array($default_values) ? array_filter($default_values) : array();
+      $form['word_link_settings']['word_link_node_types'][$type] = array(
+        '#type' => 'fieldset',
         '#title' => $name,
-        '#default_value' => isset($type_defaults[$type]['status']) ? $type_defaults[$type]['status'] : 0,
+        '#collapsible' => TRUE,
+        '#collapsed' => empty($default_values),
       );
       $form['word_link_settings']['word_link_node_types'][$type]['fields'] = array(
         '#type' => 'select',
-        '#title' => t('@type fields', array('@type' => $name)),
         '#options' => $fields,
         '#multiple' => TRUE,
         '#tree' => TRUE,
-        '#default_value' => isset($type_defaults[$type]['fields']) ? $type_defaults[$type]['fields'] : NULL,
+        '#default_value' => $default_values,
       );
     }
   }
