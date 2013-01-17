@@ -110,14 +110,37 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 }
 
 /**
+ * Implements hook_comment_view().
+ */
+function word_link_comment_view($comment, $view_mode, $langcode) {
+  $types = variable_get('word_link_node_types', array());
+
+  // Get node type.
+  $node_type = str_replace("comment_node_", '', $comment->node_type);
+
+  if (isset($types[$node_type]['fields']['comments'])) {
+    $words = word_link_get_link();
+
+    // Check CSS status.
+    if (variable_get('word_link_css', 1)) {
+      drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+    }
+
+    // Rewrite value.
+    $value = $comment->content['comment_body'][0]['#markup'];
+    $comment->content['comment_body'][0]['#markup'] = word_link_replace_text($words, $value);
+  }
+}
+
+/**
  * Implements hook_node_view().
  */
 function word_link_node_view($node, $view_mode, $langcode) {
   // Replace words for every view mode except rss.
   if ($view_mode != 'rss') {
     $types = variable_get('word_link_node_types', array());
-    // Check the status of current content type.
-    if (!empty($types[$node->type]['fields']) && $types[$node->type]['status']) {
+    // Check current content type.
+    if (!empty($types[$node->type]['fields'])) {
       // Get all words from DB.
       $words = word_link_get_link();
       if (!empty($words)) {
@@ -144,11 +167,11 @@ function word_link_node_view($node, $view_mode, $langcode) {
               if (!empty($node->content[$field_name]['#items'])) {
                 foreach ($node->content[$field_name]['#items'] as $fc_delta => $fc_item) {
                   if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
-                    $field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
-                    foreach ($field['#items'] as $fc_field_delta => $fc_field_value) {
-                      if ($fc_field_value['format'] != 'plain_text' && !empty($field[$fc_field_delta]['#markup'])) {
-                        $value = word_link_replace_text($words, $field[$fc_field_delta]['#markup']);
-                        $field[$fc_field_delta]['#markup'] = $value;
+                    $fc_field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
+                    foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
+                      if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
+                        $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup']);
+                        $fc_field[$fc_field_delta]['#markup'] = $value;
                       }
                     }
                   }
@@ -355,5 +378,5 @@ function word_link_get_node_fields($type) {
     }
   }
 
-  return $text_fields;
+  return $text_fields ? $text_fields : array();
 }
