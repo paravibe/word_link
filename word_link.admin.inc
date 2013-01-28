@@ -127,6 +127,10 @@ function word_link_admin_settings_submit($form, &$form_state) {
  * Buid a Word Link list page.
  */
 function word_link_list_page_form($form, $form_state) {
+  // Return confirm page when need to delete words.
+  if (!empty($form_state['values']['words'])) {
+    return word_link_list_page_form_delete_confirm($form, $form_state, array_filter($form_state['values']['words']));
+  }
   // Build the sortable table header.
   $header = array(
     'text' => array('data' => t('Text'), 'field' => 'wl.text'),
@@ -231,6 +235,13 @@ function word_link_list_page_form($form, $form_state) {
   $form['pager'] = array('#markup' => theme('pager'));
 
   return $form;
+}
+
+/**
+ * Submit for a Word Link list page.
+ */
+function word_link_list_page_form_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
