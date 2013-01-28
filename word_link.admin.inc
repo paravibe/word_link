@@ -133,10 +133,11 @@ function word_link_list_page_form($form, $form_state) {
   }
   // Build the sortable table header.
   $header = array(
+    'id' => array('data' => t('id'), 'field' => 'wl.id', 'sort' => 'desc'),
     'text' => array('data' => t('Text'), 'field' => 'wl.text'),
     'case_sensitive' => array('data' => t('Case sensitive'), 'field' => 'wl.case_sensitive'),
     'url' => array('data' => t('URL'), 'field' => 'wl.url'),
-    'url_title' => array('data' => t('URL Title'), 'field' => 'wl.url_title'),
+    'url_title' => array('data' => t('URL title'), 'field' => 'wl.url_title'),
     'class' => array('data' => t('Class'), 'field' => 'wl.class'),
     'except' => array('data' => t('Visibility'), 'field' => 'wl.except'),
     'operations' => array('data' => t('Operations')),
@@ -152,6 +153,7 @@ function word_link_list_page_form($form, $form_state) {
       $visibility = $word->visibility ? t('Only on') . ': ' : t('Except') . ': ';
     }
     $options[$word->id] = array(
+      'id' => $delta,
       'text' => check_plain($word->text),
       'case_sensitive' => $word->case_sensitive ? t('Yes') : t('No'),
       'url' => array(
@@ -371,6 +373,9 @@ function word_link_add_form_validate($form, &$form_state) {
     }
     if (!drupal_valid_path($form_state['values']['url'])) {
       form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
+    }
+    if (!empty($form_state['values']['class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($form_state['values']['class']))) {
+      form_set_error('class', t('Class is not valid.'));
     }
   }
 }
