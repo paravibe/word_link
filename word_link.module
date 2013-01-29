@@ -245,7 +245,7 @@ function word_link_replace_text($words, $subject) {
           )
         );
       }
-      $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text, '/') . ')(?!.*(<\/a>)|(".*>))\b/u';
+      $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text, '/') . ')(?!(<\/a>)|(".*>)|[\'"&’^])\b/u';
       if ($word->case_sensitive) {
         $search[] = $pattern;
       }
