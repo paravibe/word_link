@@ -260,14 +260,32 @@ function word_link_replace_text($words, $subject) {
     libxml_use_internal_errors(TRUE);
     $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($dom);
-    $replace_count = 0;
-    foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
-      if (empty($limit) || $limit > $replace_count) {
-        $replaced = preg_replace($search, $replace, $node->wholeText, $preg_limit, $count);
+    if ($limit != 0) {
+      $counts = array_fill(0, count($search), 0);
+      foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
+        $replaced = $node->wholeText;
+        $del = array_filter($counts);
+        foreach ($del as $key => $val) {
+          if ($val >= $limit) {
+            unset($search[$key], $replace[$key]);
+          }
+        }
+        foreach ($search as $id => $search_word) {
+          $new_preg_limit = $preg_limit - $counts[$id];
+          $replaced = preg_replace($search_word, $replace[$id], $replaced, $new_preg_limit, $count);
+          $counts[$id] += $count;
+        }
         $new_node = $dom->createDocumentFragment();
         $new_node->appendXML($replaced);
         $node->parentNode->replaceChild($new_node, $node);
-        $replace_count += $count;
+      }
+    }
+    else {
+      foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
+        $replaced = preg_replace($search, $replace, $node->wholeText);
+        $new_node = $dom->createDocumentFragment();
+        $new_node->appendXML($replaced);
+        $node->parentNode->replaceChild($new_node, $node);
       }
     }
     // Get only the body tag with its contents, then trim the body tag

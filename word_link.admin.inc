@@ -93,7 +93,8 @@ function word_link_admin_settings() {
  * Form validation for a settings page.
  */
 function word_link_admin_settings_validate($form, &$form_state) {
-  if (!is_numeric($form_state['values']['word_link_settings']['word_link_limit'])) {
+  $limit = $form_state['values']['word_link_settings']['word_link_limit'];
+  if (!is_numeric($limit) || (int) $limit < 0) {
     form_set_error('word_link_settings][word_link_limit', t('Replace limit must be numeric.'));
   }
 }
