@@ -49,7 +49,9 @@ function word_link_exchange_cron() {
  * Import form.
  */
 function word_link_exchange_import_form() {
-  $vocabularies = taxonomy_get_vocabularies();
+  if (function_exists('taxonomy_get_vocabularies')) {
+    $vocabularies = taxonomy_get_vocabularies();
+  }
   $form = array();
 
   $delimiter = array(
