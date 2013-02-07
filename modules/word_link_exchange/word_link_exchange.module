@@ -25,7 +25,7 @@ function word_link_exchange_menu() {
     'description' => 'Export to file',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('word_link_exchange_export_form'),
-    'access arguments' => array('create word link'),
+    'access arguments' => array('view word link'),
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
   );

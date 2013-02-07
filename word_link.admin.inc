@@ -186,7 +186,6 @@ function word_link_list_page_form($form, $form_state) {
         'query' => $destination,
       );
     }
-    $options[$word->id]['operations'] = array();
     if (count($operations) > 1) {
       // Render an unordered list of operations links.
       $options[$word->id]['operations'] = array(
@@ -212,7 +211,7 @@ function word_link_list_page_form($form, $form_state) {
   }
   // Only use a tableselect when the current user is able to perform any
   // operations.
-  if (user_access('delete word link')) {
+  if (user_access('edit word link') || user_access('delete word link')) {
     $form['words'] = array(
       '#type' => 'tableselect',
       '#header' => $header,
@@ -222,6 +221,7 @@ function word_link_list_page_form($form, $form_state) {
   }
   // Otherwise, use a simple table.
   else {
+    unset($header['operations']);
     $form['words'] = array(
       '#theme' => 'table',
       '#header' => $header,

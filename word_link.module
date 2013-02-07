@@ -221,7 +221,7 @@ function word_link_replace_text($words, $subject) {
           $word->url,
           array(
             'attributes' => array_filter(array(
-              'class' => $word->class,
+              'class' => array($word->class),
               'title' => $word->url_title,
               'target' => '_blank',
             )),
@@ -235,7 +235,7 @@ function word_link_replace_text($words, $subject) {
           $word->url,
           array(
             'attributes' => array_filter(array(
-              'class' => $word->class,
+              'class' => array($word->class),
               'title' => $word->url_title,
             )),
           )
