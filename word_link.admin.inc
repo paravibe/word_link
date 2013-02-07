@@ -11,15 +11,13 @@
 function word_link_admin_settings() {
   $form['#tree'] = TRUE;
   $form['word_link_settings'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#title' => t('Settings'),
-    '#collapsible' => FALSE,
   );
   $form['word_link_settings']['word_link_node_types'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#title' => t('Node types'),
     '#description' => t('Choose the fields into which Word Link will automatically insert links.'),
-    '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
   $node_types = node_type_get_names();
@@ -47,9 +45,8 @@ function word_link_admin_settings() {
       $default_values = isset($type_defaults[$type]['fields']) ? $type_defaults[$type]['fields'] : array();
       $default_values = is_array($default_values) ? array_filter($default_values) : array();
       $form['word_link_settings']['word_link_node_types'][$type] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => $name,
-        '#collapsible' => TRUE,
         '#collapsed' => empty($default_values),
       );
       $form['word_link_settings']['word_link_node_types'][$type]['fields'] = array(
@@ -190,9 +187,8 @@ function word_link_list_page_form($form, $form_state) {
       // Render an unordered list of operations links.
       $options[$word->id]['operations'] = array(
         'data' => array(
-          '#theme' => 'links__node_operations',
+          '#type' => 'operations',
           '#links' => $operations,
-          '#attributes' => array('class' => array('links', 'inline')),
         ),
       );
     }
@@ -202,7 +198,7 @@ function word_link_list_page_form($form, $form_state) {
       $options[$word->id]['operations'] = array(
         'data' => array(
           '#type' => 'link',
-          '#title' => check_plain($link['title']),
+          '#title' => $link['title'],
           '#href' => $link['href'],
           '#options' => array('query' => $link['query']),
         ),
@@ -235,7 +231,7 @@ function word_link_list_page_form($form, $form_state) {
       '#value' => t('Delete selected'),
     );
   }
-  $form['pager'] = array('#markup' => theme('pager'));
+  $form['pager'] = array('#theme' => 'pager');
 
   return $form;
 }
@@ -279,9 +275,8 @@ function word_link_list_page_form_delete_confirm_submit($form, &$form_state) {
  */
 function word_link_add_form($form, &$form_state, $id = NULL) {
   $form['word_link_add_form'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#title' => t('Add word'),
-    '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
   if (!empty($id)) {

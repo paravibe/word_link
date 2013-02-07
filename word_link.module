@@ -115,7 +115,7 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 function word_link_comment_view($comment, $view_mode, $langcode) {
   $types = variable_get('word_link_node_types', array());
   // Get node type.
-  $node_type = str_replace("comment_node_", '', $comment->node_type);
+  $node_type = str_replace("comment_node_", '', $view_mode->bundle);
   if (isset($types[$node_type]['fields']['comments'])) {
     $words = word_link_get_link();
     // Check CSS status.
@@ -152,7 +152,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
                 // If output format is not HTML, then don’t do anything.
                 if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
                   // Change field value.
-                  $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup']);
+                  $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup'], $node->langcode);
                 }
               }
             }
@@ -166,7 +166,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
                     $fc_field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
                     foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
                       if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
-                        $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup']);
+                        $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup'], $node->langcode);
                         $fc_field[$fc_field_delta]['#markup'] = $value;
                       }
                     }
@@ -184,7 +184,7 @@ function word_link_node_view($node, $view_mode, $langcode) {
 /**
  * Find and replace defined word to link.
  */
-function word_link_replace_text($words, $subject) {
+function word_link_replace_text($words, $subject, $langcode = NULL) {
   // Get disallowed html tags and explode it to array.
   $disallowed_tags = variable_get('word_link_tags_except', NULL);
   $disallowed_tags = preg_split('/\s+|<|>/', $disallowed_tags, -1, PREG_SPLIT_NO_EMPTY);
@@ -200,10 +200,10 @@ function word_link_replace_text($words, $subject) {
   // Get word link limit.
   $limit = variable_get('word_link_limit', 0);
   $preg_limit = $limit == 0 ? -1 : $limit;
-  $path = drupal_strtolower(drupal_get_path_alias());
   $current_path = current_path();
+  $path = drupal_strtolower(drupal_container()->get('path.alias_manager')->getPathAlias($current_path, $langcode));
   foreach ($words as $word) {
-    $url = drupal_get_path_alias($word->url);
+    $url = drupal_container()->get('path.alias_manager')->getPathAlias($word->url, $langcode);
     $match = FALSE;
     if (!empty($word->except)) {
       $match = drupal_match_path($path, $word->except);
@@ -312,11 +312,11 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
   }
   else {
     $query = db_select('word_link', 'wl')
-      ->extend('PagerDefault')
-        ->limit($limit)
-      ->extend('TableSort')
-        ->orderByHeader($header)
+      ->extend('Drupal\Core\Database\Query\PagerSelectExtender')
+      ->extend('Drupal\Core\Database\Query\TableSortExtender')
       ->fields('wl')
+      ->limit($limit)
+      ->orderByHeader($header)
       ->execute()
       ->fetchAll();
   }

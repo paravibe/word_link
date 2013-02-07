@@ -49,8 +49,8 @@ function word_link_exchange_cron() {
  * Import form.
  */
 function word_link_exchange_import_form() {
-  if (function_exists('taxonomy_get_vocabularies')) {
-    $vocabularies = taxonomy_get_vocabularies();
+  if (function_exists('taxonomy_vocabulary_get_names')) {
+    $vocabularies = taxonomy_vocabulary_get_names();
   }
   $form = array();
 
@@ -65,28 +65,22 @@ function word_link_exchange_import_form() {
   );
 
   if (!empty($vocabularies)) {
-    $vids = array();
-    foreach ($vocabularies as $vocabulary) {
-      $vids[$vocabulary->vid] = $vocabulary->name . ' (vid:' . $vocabulary->vid . ')';
-    }
     $form['taxonomy'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => t('Import from taxonomy'),
-      '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
     $form['taxonomy']['vocabularies'] = array(
       '#type' => 'select',
       '#title' => t('Select vocabularies'),
-      '#options' => $vids,
+      '#options' => $vocabularies,
       '#multiple' => TRUE,
     );
   }
 
   $form['import'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#title' => t('Import from file'),
-    '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
   $form['import']['file'] = array(
@@ -296,9 +290,8 @@ function word_link_exchange_export_form() {
   );
 
   $form['export'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#title' => t('Export to CSV file'),
-    '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
   $form['export']['delimiter'] = array(
