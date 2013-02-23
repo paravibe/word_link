@@ -264,7 +264,7 @@ function word_link_exchange_import_from_file($values, &$context) {
     }
     $context['results']['processed']++;
     $context['message'] = t(
-      'Created @created items. Processed @progress items.',
+      'Created @created items. Processed @processed items.',
       array(
         '@created' => $context['results']['created'],
         '@processed' => $context['results']['processed'],
