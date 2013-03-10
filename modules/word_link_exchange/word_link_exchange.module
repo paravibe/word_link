@@ -76,6 +76,14 @@ function word_link_exchange_import_form() {
       '#options' => $vocabularies,
       '#multiple' => TRUE,
     );
+    $form['taxonomy']['import_limit'] = array(
+      '#type' => 'textfield',
+      '#size' => 4,
+      '#maxlenghth' => 4,
+      '#default_value' => 250,
+      '#title' => t('Import limit'),
+      '#description' => t('This counts of terms will be processed by one page request.'),
+    );
   }
 
   $form['import'] = array(
@@ -182,6 +190,9 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       }
     }
   }
+  if (empty($form_state['values']['import_limit']) || $form_state['values']['import_limit'] < 0) {
+    $messages['import_limit'] = t('Import limit must be positive integer.');
+  }
   if (empty($file) && empty($form_state['values']['vocabularies'])) {
     $messages['vocabularies'] = t('Please select something.');
     $messages['file'] = '';
@@ -199,43 +210,26 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
 function word_link_exchange_import_form_submit($form, &$form_state) {
   $operations = array();
 
+  // Set batch operation when import from file.
   if (!empty($form_state['values']['file'])) {
-    foreach ($form_state['values']['file'] as $value) {
-      $exist = word_link_get_link_text($value['text']);
-      if (!$exist) {
-        $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-        $operations[] = array(
-          'word_link_exchange_import_add_new',
-          array(
-            $value,
-          ),
-        );
-      }
-    }
+    $operations[] = array(
+      'word_link_exchange_import_from_file',
+      array(
+        $form_state['values']['file'],
+      ),
+    );
   }
 
+  // Set batch operation when import from taxonomy.
   if (!empty($form_state['values']['vocabularies'])) {
     foreach ($form_state['values']['vocabularies'] as $vid) {
-      $tree = taxonomy_get_tree($vid);
-      foreach ($tree as $term) {
-        $exist = word_link_get_link_text($term->name);
-        if (!$exist) {
-          $value = array(
-            'text' => $term->name,
-            'case_sensitive' => 1,
-            'url' => 'taxonomy/term/' . $term->tid,
-            'url_title' => $term->name,
-            'visibility' => 0,
-            'except' => NULL,
-          );
-          $operations[] = array(
-            'word_link_exchange_import_add_new',
-            array(
-              $value,
-            ),
-          );
-        }
-      }
+      $operations[] = array(
+        'word_link_exchange_import_from_taxonomy',
+        array(
+          $vid,
+          $form_state['values']['import_limit'],
+        ),
+      );
     }
   }
 
@@ -248,11 +242,96 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
 }
 
 /**
- * Import links to DB.
+ * Import links from file to DB.
  */
-function word_link_exchange_import_add_new($values, &$context) {
-  drupal_write_record('word_link', $values);
-  $context['results'][] = $values['text'];
+function word_link_exchange_import_from_file($values, &$context) {
+  if (empty($context['results'])) {
+    $context['results']['created'] = 0;
+    $context['results']['processed'] = 0;
+  }
+  foreach ($values as $value) {
+    $exist = word_link_get_link_text($value['text']);
+    if (!$exist) {
+      $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
+      drupal_write_record('word_link', $value);
+      $context['results']['created']++;
+    }
+    $context['results']['processed']++;
+    $context['message'] = t(
+      'Created @created items. Processed @processed items.',
+      array(
+        '@created' => $context['results']['created'],
+        '@processed' => $context['results']['processed'],
+      )
+    );
+  }
+}
+
+/**
+ * Import links from taxonomy terms to DB.
+ */
+function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
+  if (empty($context['sandbox'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = word_link_exchange_get_count_taxonomy_terms($vid);
+  }
+  if (empty($context['results'])) {
+    $context['results']['processed'] = 0;
+    $context['results']['created'] = 0;
+  }
+  $tree = word_link_exchange_get_taxonomy_terms($vid, $context['sandbox']['progress'], $limit);
+  foreach ($tree as $term) {
+    $exist = word_link_get_link_text($term->name);
+    if (!$exist) {
+      $value = array(
+        'text' => $term->name,
+        'case_sensitive' => 1,
+        'url' => 'taxonomy/term/' . $term->tid,
+        'url_title' => $term->name,
+        'visibility' => 0,
+        'except' => NULL,
+      );
+      drupal_write_record('word_link', $value);
+      $context['results']['created']++;
+    }
+    $context['results']['processed']++;
+    $context['sandbox']['progress']++;
+    $context['message'] = t(
+      'Created @created items. Processed @processed items.',
+      array(
+        '@created' => $context['results']['created'],
+        '@processed' => $context['results']['processed'],
+      )
+    );
+  }
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Helper function to get count of taxonomy terms from DB.
+ */
+function word_link_exchange_get_count_taxonomy_terms($vid) {
+  $query = db_select('taxonomy_term_data', 't');
+  $query->condition('t.vid', $vid, '=');
+  $result = $query->countQuery()->execute()->fetchField();
+
+  return $result;
+}
+
+/**
+ * Helper function to get taxonomy terms from DB.
+ */
+function word_link_exchange_get_taxonomy_terms($vid, $from, $limit) {
+  $query = db_select('taxonomy_term_data', 't');
+  $query->range($from, $limit);
+  $result = $query->fields('t', array('name', 'tid'))->condition('t.vid', $vid)->orderBy('t.tid')->execute();
+
+  foreach ($result as $term) {
+    $terms[$term->tid] = $term;
+  }
+  return $terms;
 }
 
 /**
@@ -260,12 +339,12 @@ function word_link_exchange_import_add_new($values, &$context) {
  */
 function word_link_exchange_import_batch_finish($success, $results, $operations) {
   if ($success) {
-    $message = format_plural(count($results), 'One word imported.', '@count words imported.');
+    drupal_set_message(format_plural($results['created'], 'One word imported.', '@count words imported.'));
+    drupal_set_message(format_plural($results['processed'], 'One item processed.', '@count items processed.'));
   }
   else {
-    $message = t('Finished with an error.');
+    drupal_set_message(t('Finished with an error.'), 'error');
   }
-  drupal_set_message($message);
 }
 
 /**
