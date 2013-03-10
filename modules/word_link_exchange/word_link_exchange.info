@@ -1,5 +1,0 @@
-name = Word Link exchange
-description = Provides a possibility to import/export words.
-core = 8.x
-dependencies[] = word_link
-dependencies[] = taxonomy
