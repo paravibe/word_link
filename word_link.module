@@ -211,7 +211,7 @@ function word_link_replace_text($words, $subject) {
         $match = $match || drupal_match_path($current_path, $word->except);
       }
     }
-    $visibility = empty($word->except) ? FALSE : $word->visibility;
+    $visibility = empty($word->except) || !isset($word->visibility) ? FALSE : $word->visibility;
     if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
       // Build a link.
       $pattern = '$0';
