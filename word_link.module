@@ -290,7 +290,7 @@ function word_link_replace_text($words, $subject) {
     // itself to get only the original content.
     $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
   }
-  return str_replace(array('<!--word_link<iframe', '</iframe>word_link-->'), array('<iframe', '</iframe>'), $subject);
+  return str_replace(array('<!--word_link<iframe', '</iframe>word_link-->', '#38;'), array('<iframe', '</iframe>', ''), $subject);
 }
 
 /**
