@@ -37,6 +37,7 @@ function word_link_exchange_menu() {
  * Implements hook_cron().
  */
 function word_link_exchange_cron() {
+  // Sccan public directory for word-link csv files and delete it.
   $file_list = file_scan_directory('public://', '/word_link_[0-9]{2}_[0-9]{2}_[0-9]{4}T[0-9]{2}_[0-9]{2}(|_[0-9]{1,2}).csv/');
   if (!empty($file_list)) {
     foreach ($file_list as $file) {
@@ -49,11 +50,10 @@ function word_link_exchange_cron() {
  * Import form.
  */
 function word_link_exchange_import_form() {
+  $form = array();
   if (function_exists('taxonomy_get_vocabularies')) {
     $vocabularies = taxonomy_get_vocabularies();
   }
-  $form = array();
-
   $delimiter = array(
     'semicolon' => t('« ; » (Semicolon)'),
     'comma' => t('« , » (Comma)'),
@@ -64,6 +64,7 @@ function word_link_exchange_import_form() {
     'custom_delimiter' => t('Custom delimiter'),
   );
 
+  // Show import from taxonomy only when we have vocabularies.
   if (!empty($vocabularies)) {
     $vids = array();
     foreach ($vocabularies as $vocabulary) {
@@ -135,6 +136,7 @@ function word_link_exchange_import_form() {
 function word_link_exchange_import_form_validate($form, &$form_state) {
   // Preload file.
   $file = file_save_upload('file', array('file_validate_extensions' => array('csv txt')));
+
   if (!empty($file)) {
     $file->filepath = drupal_realpath($file->uri);
     if (!empty($file->filepath)) {
@@ -196,13 +198,17 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       }
     }
   }
+
   if (empty($form_state['values']['import_limit']) || $form_state['values']['import_limit'] < 0) {
     $messages['import_limit'] = t('Import limit must be positive integer.');
   }
+
   if (empty($file) && empty($form_state['values']['vocabularies'])) {
     $messages['vocabularies'] = t('Please select something.');
     $messages['file'] = '';
   }
+
+  // Set error messages.
   if (isset($messages)) {
     foreach ($messages as $item => $message) {
       form_set_error(check_plain($item), filter_xss($message));
@@ -316,7 +322,13 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
 }
 
 /**
- * Helper function to get count of taxonomy terms from DB.
+ * Get count of taxonomy terms from DB.
+ *
+ * @param int $vid
+ *   Vocabulary id.
+ *
+ * @return int
+ *   Return count of terms.
  */
 function word_link_exchange_get_count_taxonomy_terms($vid) {
   $query = db_select('taxonomy_term_data', 't');
@@ -327,7 +339,17 @@ function word_link_exchange_get_count_taxonomy_terms($vid) {
 }
 
 /**
- * Helper function to get taxonomy terms from DB.
+ * Get taxonomy terms from DB.
+ *
+ * @param int $vid
+ *   Vocabulary id.
+ * @param int $from
+ *   Start from.
+ * @param int $limit
+ *   Query limit.
+ *
+ * @return array
+ *   Array with taxonomy terms.
  */
 function word_link_exchange_get_taxonomy_terms($vid, $from, $limit) {
   $query = db_select('taxonomy_term_data', 't');
@@ -354,7 +376,7 @@ function word_link_exchange_import_batch_finish($success, $results, $operations)
 }
 
 /**
- * Export taxonomy to word link.
+ * Export taxonomy to word link form.
  */
 function word_link_exchange_export_form() {
   $form = array();
@@ -413,7 +435,7 @@ function word_link_exchange_export_form() {
 }
 
 /**
- * Validate for word_link_exchange_export_form.
+ * Validate for export form.
  */
 function word_link_exchange_export_form_validate($form, &$form_state) {
   // If custom delimiter is empty then show error.
@@ -423,7 +445,7 @@ function word_link_exchange_export_form_validate($form, &$form_state) {
 }
 
 /**
- * Export for word_link_exchange_export_form.
+ * Submit for export form.
  */
 function word_link_exchange_export_form_submit($form, &$form_state) {
   // Get all words from DB.

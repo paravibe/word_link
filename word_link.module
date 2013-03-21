@@ -140,14 +140,18 @@ function word_link_node_view($node, $view_mode, $langcode) {
       // Get all words from DB.
       $words = word_link_get_link();
       if (!empty($words)) {
+        // Add style if need.
         $css_status = variable_get('word_link_css', 1);
         if ($css_status) {
           drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
         }
+        // Convert words for each field.
         foreach ($types[$node->type]['fields'] as $field_name => $field) {
+          // Check if we process a field.
           if (!is_array($field)) {
             // Check if field has some text.
             if (!empty($node->content[$field]['#items'])) {
+              // Convert words for each field value.
               foreach ($node->content[$field]['#items'] as $delta => $item) {
                 // If output format is not HTML, then don’t do anything.
                 if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
@@ -157,14 +161,17 @@ function word_link_node_view($node, $view_mode, $langcode) {
               }
             }
           }
+          // Process field collection.
           else {
-            // Process field collection.
             foreach ($field as $fc) {
+              // Check if field have some value.
               if (!empty($node->content[$field_name]['#items'])) {
+                // Convert words for each field value.
                 foreach ($node->content[$field_name]['#items'] as $fc_delta => $fc_item) {
                   if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
                     $fc_field = &$node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
                     foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
+                      // Change field value if output format is not plain text.
                       if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
                         $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup']);
                         $fc_field[$fc_field_delta]['#markup'] = $value;
@@ -182,39 +189,60 @@ function word_link_node_view($node, $view_mode, $langcode) {
 }
 
 /**
- * Find and replace defined word to link.
+ * Find and convert defined word to link.
+ *
+ * @param array $words
+ *   Array with words.
+ * @param string $subject
+ *   String in which need convert words to links.
+ *
+ * @return string
+ *   String with converted words.
  */
 function word_link_replace_text($words, $subject) {
+
   // Get disallowed html tags and explode it to array.
   $disallowed_tags = variable_get('word_link_tags_except', NULL);
   $disallowed_tags = preg_split('/\s+|<|>/', $disallowed_tags, -1, PREG_SPLIT_NO_EMPTY);
+
+  // Implode all disallowed tags to string.
+  $not = '';
   if (!empty($disallowed_tags)) {
+    $not = array();
     foreach ($disallowed_tags as $ancestor) {
       $not[] = 'and not(ancestor::' . $ancestor . ')';
     }
     $not = implode(' ', $not);
   }
-  else {
-    $not = '';
-  }
+
   // Get word link limit.
   $limit = variable_get('word_link_limit', 0);
   $preg_limit = $limit == 0 ? -1 : $limit;
+
+  // Get current path.
   $path = drupal_strtolower(drupal_get_path_alias());
   $current_path = current_path();
+
+  // Create array of links and replace patterns for each word.
   foreach ($words as $word) {
     $url = drupal_get_path_alias($word->url);
     $match = FALSE;
+
+    // Check if current path matches word except path.
     if (!empty($word->except)) {
       $match = drupal_match_path($path, $word->except);
       if ($path != $current_path) {
         $match = $match || drupal_match_path($current_path, $word->except);
       }
     }
+
+    // Get visibility status and check if need to convert word on this page.
     $visibility = empty($word->except) || !isset($word->visibility) ? FALSE : $word->visibility;
+
     if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
-      // Build a link.
+      // Pattern which will be used to replace words.
       $pattern = '$0';
+      // Build external link.
       if (strpos($word->url, 'http://') === 0 || strpos($word->url, 'https://') === 0) {
         $replace[] = l(
           $pattern,
@@ -229,6 +257,7 @@ function word_link_replace_text($words, $subject) {
           )
         );
       }
+      // Build internal link.
       else {
         $replace[] = l(
           $pattern,
@@ -241,6 +270,8 @@ function word_link_replace_text($words, $subject) {
           )
         );
       }
+
+      // Build a patterns array.
       $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text, '/') . ')(?!(<\/a>)|(".*>)|[\'"&’^])\b/u';
       if ($word->case_sensitive) {
         $search[] = $pattern;
@@ -250,12 +281,21 @@ function word_link_replace_text($words, $subject) {
       }
     }
   }
+  // Find and convert words if $searh and $replace arrays are not empty.
   if (isset($search) && isset($replace)) {
     $dom = new DOMDocument();
-    $subject = str_replace('&amp;', '&#38;#38;', preg_replace('/&(?![a-z])/u', '&amp;', $subject));
+
+    // Replace '$' to '&amp;';
+    $subject = preg_replace('/&(?![a-z])/u', '&amp;', $subject);
+    // Replace '&amp;' to '&#38;#38;';
+    $subject = str_replace('&amp;', '&#38;#38;', $subject);
     // Comment <iframe> tag because it can cause error.
     $subject = str_replace(array('<iframe', '</iframe>'), array('<!--word_link<iframe', '</iframe>word_link-->'), $subject);
+
+    // Turn off errors.
     libxml_use_internal_errors(TRUE);
+
+    // Load string to DOMDocument.
     $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($dom);
     if ($limit != 0) {
@@ -290,13 +330,40 @@ function word_link_replace_text($words, $subject) {
     // itself to get only the original content.
     $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
   }
-  return str_replace(array('<!--word_link<iframe', '</iframe>word_link-->', '#38;'), array('<iframe', '</iframe>', ''), $subject);
+
+  // Remove iframe comments.
+  $subject = str_replace(
+    array(
+      '<!--word_link<iframe',
+      '</iframe>word_link-->',
+      '#38;',
+    ),
+    array(
+      '<iframe',
+      '</iframe>',
+      '',
+    ),
+    $subject
+  );
+
+  return $subject;
 }
 
 /**
  * Get links from DB.
+ *
+ * @param int $id
+ *   (optional) ID of a word.
+ * @param array $header
+ *   (optional) header to build a table.
+ * @param int $limit
+ *   (optional) determines the number of fields to get.
+ *
+ * @return array
+ *   Formatted array with links.
  */
 function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
+  // Get only one link by given id.
   if ($id) {
     $query = db_select('word_link', 'wl')
       ->fields('wl')
@@ -304,12 +371,14 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
       ->execute()
       ->fetchAll();
   }
+  // Get all links.
   elseif (empty($id) && empty($header) && empty($limit)) {
     $query = db_select('word_link', 'wl')
       ->fields('wl')
       ->execute()
       ->fetchAll();
   }
+  // Get links and extend query with pager and sort.
   else {
     $query = db_select('word_link', 'wl')
       ->extend('PagerDefault')
@@ -320,17 +389,27 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
       ->execute()
       ->fetchAll();
   }
+
   $links = array();
   if (count($query) > 0) {
     foreach ($query as $value) {
       $links[$value->id] = $value;
     }
   }
+
   return $links;
 }
 
 /**
  * Verify by text if link already exists.
+ *
+ * @param string $text
+ *   Word text which need to find.
+ * @param int $id
+ *   (optional) ID of a word.
+ *
+ * @return bool
+ *   Return TRUE if word exist or FALSE if not.
  */
 function word_link_get_link_text($text, $id = 0) {
   if ($text) {
@@ -341,6 +420,7 @@ function word_link_get_link_text($text, $id = 0) {
       ->execute()
       ->fetchAll();
   }
+
   if (empty($result)) {
     return FALSE;
   }
@@ -350,11 +430,20 @@ function word_link_get_link_text($text, $id = 0) {
   elseif (drupal_strtolower($text) == drupal_strtolower($result[0]->text)) {
     return TRUE;
   }
+
   return FALSE;
 }
 
 /**
  * Add/Update link to DB.
+ *
+ * @param string $action
+ *   Action which need to do.
+ *   Can be 'insert' or 'update'.
+ * @param array $values
+ *   Array with values that need to process.
+ * @param int $id
+ *   (optional) ID of a word.
  */
 function word_link_add_update_link($action, $values, $id = NULL) {
   if ($action == 'insert') {
@@ -368,6 +457,9 @@ function word_link_add_update_link($action, $values, $id = NULL) {
 
 /**
  * Delete link from DB.
+ *
+ * @param int $id
+ *   ID of a word.
  */
 function word_link_del_link($id) {
   db_delete('word_link')->condition('id', $id)->execute();
@@ -375,6 +467,12 @@ function word_link_del_link($id) {
 
 /**
  * Get textarea fields of given content type.
+ *
+ * @param string $type
+ *   The bundle name for which to return fields.
+ *
+ * @return array
+ *   Array with textarea fields or empty array if it's not found.
  */
 function word_link_get_node_fields($type) {
   $fields = field_info_instances('node', $type);

@@ -22,6 +22,8 @@ function word_link_admin_settings() {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
+
+  // Get all node types.
   $node_types = node_type_get_names();
   $type_defaults = variable_get('word_link_node_types', array());
   foreach ($type_defaults as $content => $type) {
@@ -104,6 +106,7 @@ function word_link_admin_settings_validate($form, &$form_state) {
  */
 function word_link_admin_settings_submit($form, &$form_state) {
   $types = $form_state['values']['word_link_settings']['word_link_node_types'];
+
   foreach ($form_state['values']['word_link_settings']['word_link_node_types'] as $content => $type) {
     $fields = array();
     foreach ($type['fields'] as $field) {
@@ -117,10 +120,13 @@ function word_link_admin_settings_submit($form, &$form_state) {
     }
     $types[$content]['fields'] = $fields;
   }
+
+  // Set variables for word-link settings.
   variable_set('word_link_limit', $form_state['values']['word_link_settings']['word_link_limit']);
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
   variable_set('word_link_node_types', $types);
   variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
+
   drupal_set_message(t('Saved'));
 }
 
@@ -132,6 +138,7 @@ function word_link_list_page_form($form, $form_state) {
   if (!empty($form_state['values']['words'])) {
     return word_link_list_page_form_delete_confirm($form, $form_state, array_filter($form_state['values']['words']));
   }
+
   // Build the sortable table header.
   $header = array(
     'id' => array('data' => t('id'), 'field' => 'wl.id', 'sort' => 'desc'),
@@ -143,6 +150,7 @@ function word_link_list_page_form($form, $form_state) {
     'except' => array('data' => t('Visibility'), 'field' => 'wl.except'),
     'operations' => array('data' => t('Operations')),
   );
+
   // Get words from DB.
   $words = word_link_get_link(NULL, $header, 50);
 
@@ -260,6 +268,7 @@ function word_link_list_page_form_delete_confirm($form, &$form_state, $words) {
   }
   $form['#submit'][] = 'word_link_list_page_form_delete_confirm_submit';
   $confirm_question = format_plural(count($words), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
+
   return confirm_form($form, $confirm_question, 'admin/config/content/word-link/list', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
 }
 
