@@ -283,9 +283,7 @@ function word_link_replace_text($words, $subject) {
   }
   // Find and convert words if $searh and $replace arrays are not empty.
   if (isset($search) && isset($replace)) {
-    $dom = new DOMDocument();
-
-    // Replace '$' to '&amp;';
+    // Replace '&' to '&amp;';
     $subject = preg_replace('/&(?![a-z])/u', '&amp;', $subject);
     // Replace '&amp;' to '&#38;#38;';
     $subject = str_replace('&amp;', '&#38;#38;', $subject);
@@ -296,7 +294,7 @@ function word_link_replace_text($words, $subject) {
     libxml_use_internal_errors(TRUE);
 
     // Load string to DOMDocument.
-    $dom->loadHTML(mb_convert_encoding(htmlspecialchars_decode($subject), 'HTML-ENTITIES', 'UTF-8'));
+    $dom = filter_dom_load($subject);
     $xpath = new DOMXPath($dom);
     if ($limit != 0) {
       $counts = array_fill(0, count($search), 0);
@@ -328,7 +326,7 @@ function word_link_replace_text($words, $subject) {
     }
     // Get only the body tag with its contents, then trim the body tag
     // itself to get only the original content.
-    $subject = drupal_substr($dom->saveXML($xpath->query('//body')->item(0)), 6, -7);
+    $subject = filter_dom_serialize($dom);
   }
 
   // Remove iframe comments.
