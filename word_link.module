@@ -287,8 +287,6 @@ function word_link_replace_text($words, $subject) {
     $subject = preg_replace('/&(?![a-z])/u', '&amp;', $subject);
     // Replace '&amp;' to '&#38;#38;';
     $subject = str_replace('&amp;', '&#38;#38;', $subject);
-    // Comment <iframe> tag because it can cause error.
-    $subject = str_replace(array('<iframe', '</iframe>'), array('<!--word_link<iframe', '</iframe>word_link-->'), $subject);
 
     // Turn off errors.
     libxml_use_internal_errors(TRUE);
@@ -324,25 +322,12 @@ function word_link_replace_text($words, $subject) {
         $node->parentNode->replaceChild($new_node, $node);
       }
     }
-    // Get only the body tag with its contents, then trim the body tag
-    // itself to get only the original content.
+    // Convert a DOM object back to an HTML snippet.
     $subject = filter_dom_serialize($dom);
   }
 
-  // Remove iframe comments.
-  $subject = str_replace(
-    array(
-      '<!--word_link<iframe',
-      '</iframe>word_link-->',
-      '#38;',
-    ),
-    array(
-      '<iframe',
-      '</iframe>',
-      '',
-    ),
-    $subject
-  );
+  // Remove '#38;' entity.
+  $subject = str_replace('#38;', '', $subject);
 
   return $subject;
 }
