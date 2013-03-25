@@ -378,7 +378,7 @@ function word_link_add_form_validate($form, &$form_state) {
     $args = arg();
     $normal_path = drupal_get_normal_path($form_state['values']['url']);
     $arg = empty($args[5]) ? 0 : $args[5];
-    $exist = word_link_get_link_text(trim($form_state['values']['text']), $arg);
+    $exist = word_link_word_exist(trim($form_state['values']['text']), $arg);
     if ($exist) {
       form_set_error('text', t('This word already exists.'));
     }

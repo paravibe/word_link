@@ -121,6 +121,11 @@ function word_link_exchange_import_form() {
       ),
     ),
   );
+  $form['import']['update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Only update values'),
+    '#description' => t('If checked, new words will be added and old will be updated. If not, only new words will be added.'),
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -228,6 +233,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
       'word_link_exchange_import_from_file',
       array(
         $form_state['values']['file'],
+        $form_state['values']['update'],
       ),
     );
   }
@@ -256,23 +262,30 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
 /**
  * Import links from file to DB.
  */
-function word_link_exchange_import_from_file($values, &$context) {
+function word_link_exchange_import_from_file($values, $update, &$context) {
   if (empty($context['results'])) {
     $context['results']['created'] = 0;
+    $context['results']['updated'] = 0;
     $context['results']['processed'] = 0;
   }
   foreach ($values as $value) {
-    $exist = word_link_get_link_text($value['text']);
+    $exist = word_link_word_exist($value['text']);
     if (!$exist) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      drupal_write_record('word_link', $value);
+      word_link_add_update_link('insert', $value);
       $context['results']['created']++;
+    }
+    elseif ($exist && $update) {
+      $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
+      word_link_add_update_link('update', $value, $exist);
+      $context['results']['updated']++;
     }
     $context['results']['processed']++;
     $context['message'] = t(
-      'Created @created items. Processed @processed items.',
+      'Created @created items. Updated @updated items. Processed @processed items.',
       array(
         '@created' => $context['results']['created'],
+        '@updated' => $context['results']['updated'],
         '@processed' => $context['results']['processed'],
       )
     );
@@ -293,7 +306,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
   }
   $tree = word_link_exchange_get_taxonomy_terms($vid, $context['sandbox']['progress'], $limit);
   foreach ($tree as $term) {
-    $exist = word_link_get_link_text($term->name);
+    $exist = word_link_word_exist($term->name);
     if (!$exist) {
       $value = array(
         'text' => $term->name,
@@ -303,7 +316,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
         'visibility' => 0,
         'except' => NULL,
       );
-      drupal_write_record('word_link', $value);
+      word_link_add_update_link('insert', $value);
       $context['results']['created']++;
     }
     $context['results']['processed']++;
@@ -368,6 +381,9 @@ function word_link_exchange_get_taxonomy_terms($vid, $from, $limit) {
 function word_link_exchange_import_batch_finish($success, $results, $operations) {
   if ($success) {
     drupal_set_message(format_plural($results['created'], 'One word imported.', '@count words imported.'));
+    if (isset($results['updated'])) {
+      drupal_set_message(format_plural($results['updated'], 'One word updated.', '@count words updated.'));
+    }
     drupal_set_message(format_plural($results['processed'], 'One item processed.', '@count items processed.'));
   }
   else {

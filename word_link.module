@@ -392,12 +392,12 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
  *   (optional) ID of a word.
  *
  * @return bool
- *   Return TRUE if word exist or FALSE if not.
+ *   Return word ID if word exist or FALSE if not.
  */
-function word_link_get_link_text($text, $id = 0) {
+function word_link_word_exist($text, $id = 0) {
   if ($text) {
     $result = db_select('word_link', 'wl')
-      ->fields('wl', array('text', 'case_sensitive'))
+      ->fields('wl', array('text', 'case_sensitive', 'id'))
       ->condition('id', $id, '!=')
       ->condition('text', $text, '=')
       ->execute()
@@ -408,10 +408,10 @@ function word_link_get_link_text($text, $id = 0) {
     return FALSE;
   }
   if (count($result) > 1) {
-    return TRUE;
+    return $result[0]->id;
   }
   elseif (drupal_strtolower($text) == drupal_strtolower($result[0]->text)) {
-    return TRUE;
+    return $result[0]->id;
   }
 
   return FALSE;
