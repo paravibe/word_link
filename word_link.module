@@ -291,7 +291,7 @@ function word_link_replace_text($words, $subject) {
           );
         }
       }
-      // If highlight is on wrapp words to <span> tag.
+      // If highlight is turned on, wrap words in <span> tag.
       else {
         $replace[] = '<span title="' . $word->url_title . '" class="' . $word->class . '">' . $pattern . '</span>';
       }
