@@ -1,8 +1,4 @@
-a.word-link {
+.word-link {
   background: url(external.png) top right no-repeat;
   padding-right: 10px;
-}
-
-span.word-link {
-  color: #1570a6;
 }

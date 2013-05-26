@@ -27,7 +27,6 @@ function word_link_uninstall() {
   variable_del('word_link_tags_except');
   variable_del('word_link_node_types');
   variable_del('word_link_css');
-  variable_del('word_link_highlight');
 }
 
 /**
