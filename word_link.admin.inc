@@ -69,6 +69,12 @@ function word_link_admin_settings() {
     '#description' => t('If turned on default CSS from module will be added.'),
     '#default_value' => variable_get('word_link_css', 1),
   );
+  $form['word_link_settings']['word_link_highlight'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Highlight words.'),
+    '#description' => t('Highlight found words instead of replace it to links.'),
+    '#default_value' => variable_get('word_link_highlight', 0),
+  );
   $form['word_link_settings']['word_link_limit'] = array(
     '#type' => 'textfield',
     '#size' => 5,
@@ -126,6 +132,9 @@ function word_link_admin_settings_submit($form, &$form_state) {
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
   variable_set('word_link_node_types', $types);
   variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
+  variable_set('word_link_highlight', $form_state['values']['word_link_settings']['word_link_highlight']);
+
+  cache_clear_all('word_link_nid_', 'cache', TRUE);
 
   drupal_set_message(t('Saved'));
 }

@@ -128,10 +128,17 @@ function word_link_comment_view($comment, $view_mode, $langcode) {
   }
 }
 
-
+/**
+ * Implements hook_node_update().
+ */
 function word_link_node_update($node) {
-  $cache_key = "word_link_nid_{$node->nid}";
-  cache_clear_all($cache_key, 'cache', true);
+  $types = variable_get('word_link_node_types', array());
+
+  // Check if for this node selected any field to convert words.
+  if (!empty($types[$node->type]['fields'])) {
+    $cache_key = "word_link_nid_{$node->nid}";
+    cache_clear_all($cache_key, 'cache', TRUE);
+  }
 }
 
 /**
@@ -144,59 +151,78 @@ function word_link_node_view($node, $view_mode, $langcode) {
     // Check current content type.
     if (!empty($types[$node->type]['fields'])) {
       // Get all words from DB.
-      // Add style if need.
-      $css_status = variable_get('word_link_css', 1);
-      if ($css_status) {
-        drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+      $words = word_link_get_link();
+      if (!empty($words)) {
+        // Add style if need.
+        $css_status = variable_get('word_link_css', 1);
+        if ($css_status) {
+          drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+        }
+        // Convert words for each field.
+        word_link_process_node_fields($node, $types, $words);
       }
-      // Convert words for each field.
-      foreach ($types[$node->type]['fields'] as $field_name => $field) {
-        // Check if we process a field.
-        if (!is_array($field)) {
-          // Check if field has some text.
-          if (!empty($node->content[$field]['#items'])) {
-            // Convert words for each field value.
-            foreach ($node->content[$field]['#items'] as $delta => $item) {
-              // If output format is not HTML, then don’t do anything.
-              if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
-                // Change field value.
-                $cache_key = "word_link_nid_{$node->nid}_{$field}_{$delta}";
-                $cached = cache_get($cache_key);
-                if (isset($cached->data)) {
-                  $node->content[$field][$delta]['#markup'] = $cached->data;
-                } else {
-                  $words = word_link_get_link();
-                  $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup']);
-                  cache_set($cache_key, $node->content[$field][$delta]['#markup']);
-                }
-              }
+    }
+  }
+}
+
+/**
+ * Find node fields content and pass it for processing.
+ *
+ * @param object $node
+ *   Full node object.
+ * @param array $types
+ *   Content types in which need to convert words.
+ * @param array $words
+ *   User defined words.
+ */
+function word_link_process_node_fields(&$node, $types, $words) {
+  foreach ($types[$node->type]['fields'] as $field_name => $field) {
+    // Check if we process a field.
+    if (!is_array($field)) {
+      // Check if field has some text.
+      if (!empty($node->content[$field]['#items'])) {
+        // Convert words for each field value.
+        foreach ($node->content[$field]['#items'] as $delta => $item) {
+          // If output format is not HTML, then don’t do anything.
+          if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
+            // Change field value.
+            $cache_key = "word_link_nid_{$node->nid}_{$field}_{$delta}";
+            $cached = cache_get($cache_key);
+            if (isset($cached->data)) {
+              $node->content[$field][$delta]['#markup'] = $cached->data;
+            }
+            else {
+              $words = word_link_get_link();
+              $node->content[$field][$delta]['#markup'] = word_link_replace_text($words, $node->content[$field][$delta]['#markup']);
+              cache_set($cache_key, $node->content[$field][$delta]['#markup']);
             }
           }
-        } // Process field collection.
-        else {
-          foreach ($field as $fc) {
-            // Check if field have some value.
-            if (!empty($node->content[$field_name]['#items'])) {
-              // Convert words for each field value.
-              foreach ($node->content[$field_name]['#items'] as $fc_delta => $fc_item) {
-                if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
-                  $fc_field = & $node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
-                  foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
-                    // Change field value if output format is not plain text.
-                    if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
-
-                      $cache_key = "word_link_nid_{$node->nid}_{$field}_{$fc_delta}";
-                      $cached = cache_get($cache_key);
-                      if (isset($cached->data)) {
-                        $value = $cached->data;
-                      } else {
-                        $words = word_link_get_link();
-                        $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup']);
-                        cache_set($cache_key, $value);
-                      }
-                      $fc_field[$fc_field_delta]['#markup'] = $value;
-                    }
+        }
+      }
+    }
+    // Process field collection.
+    else {
+      foreach ($field as $fc) {
+        // Check if field have some value.
+        if (!empty($node->content[$field_name]['#items'])) {
+          // Convert words for each field value.
+          foreach ($node->content[$field_name]['#items'] as $fc_delta => $fc_item) {
+            if (!empty($node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc])) {
+              $fc_field = & $node->content[$field_name][$fc_delta]['entity']['field_collection_item'][$fc_item['value']][$fc];
+              foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
+                // Change field value if output format is not plain text.
+                if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
+                  $cache_key = "word_link_nid_{$node->nid}_{$field}_{$fc_delta}";
+                  $cached = cache_get($cache_key);
+                  if (isset($cached->data)) {
+                    $value = $cached->data;
                   }
+                  else {
+                    $words = word_link_get_link();
+                    $value = word_link_replace_text($words, $fc_field[$fc_field_delta]['#markup']);
+                    cache_set($cache_key, $value);
+                  }
+                  $fc_field[$fc_field_delta]['#markup'] = $value;
                 }
               }
             }
@@ -242,6 +268,9 @@ function word_link_replace_text($words, $subject) {
   $path = drupal_strtolower(drupal_get_path_alias());
   $current_path = current_path();
 
+  // Get highlight status.
+  $highlight = variable_get('word_link_highlight', 0);
+
   // Create array of links and replace patterns for each word.
   foreach ($words as $word) {
     $url = drupal_get_path_alias($word->url);
@@ -261,39 +290,49 @@ function word_link_replace_text($words, $subject) {
     if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
       // Pattern which will be used to replace words.
       $pattern = '$0';
-      // Build external link.
-      if (strpos($word->url, 'http://') === 0 || strpos($word->url, 'https://') === 0) {
-        $replace[] = l(
-          $pattern,
-          $word->url,
-          array(
-            'attributes' => array_filter(array(
-              'class' => array($word->class),
-              'title' => $word->url_title,
-              'target' => '_blank',
-            )),
-            'external' => TRUE,
-          )
-        );
-      } // Build internal link.
+
+      // If highlight is off build links.
+      if (!$highlight) {
+        // Build external link.
+        if (strpos($word->url, 'http://') === 0 || strpos($word->url, 'https://') === 0) {
+          $replace[] = l(
+            $pattern,
+            $word->url,
+            array(
+              'attributes' => array_filter(array(
+                'class' => array($word->class),
+                'title' => $word->url_title,
+                'target' => '_blank',
+              )),
+              'external' => TRUE,
+            )
+          );
+        }
+        // Build internal link.
+        else {
+          $replace[] = l(
+            $pattern,
+            $word->url,
+            array(
+              'attributes' => array_filter(array(
+                'class' => array($word->class),
+                'title' => $word->url_title,
+              )),
+            )
+          );
+        }
+      }
+      // If highlight is turned on, wrap words in <span> tag.
       else {
-        $replace[] = l(
-          $pattern,
-          $word->url,
-          array(
-            'attributes' => array_filter(array(
-              'class' => array($word->class),
-              'title' => $word->url_title,
-            )),
-          )
-        );
+        $replace[] = '<span title="' . $word->url_title . '" class="' . $word->class . '">' . $pattern . '</span>';
       }
 
       // Build a patterns array.
       $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text, '/') . ')(?!(.*<\/a>)|(".*>)|[\'"&’^])\b/u';
       if ($word->case_sensitive) {
         $search[] = $pattern;
-      } else {
+      }
+      else {
         $search[] = $pattern . 'i';
       }
     }
@@ -330,7 +369,8 @@ function word_link_replace_text($words, $subject) {
         $new_node->appendXML($replaced);
         $node->parentNode->replaceChild($new_node, $node);
       }
-    } else {
+    }
+    else {
       foreach ($xpath->query('//text()[not(ancestor::a) ' . $not . ']') as $node) {
         $replaced = preg_replace($search, $replace, $node->wholeText);
         $new_node = $dom->createDocumentFragment();
@@ -363,7 +403,7 @@ function word_link_replace_text($words, $subject) {
  */
 function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
   $words = drupal_static(__FUNCTION__);
-  $key = false;
+  $key = FALSE;
   // Get only one link by given id.
   if ($id) {
     $query = isset($words['id'][$id]) ? $words['id'][$id] :
@@ -373,7 +413,8 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
             ->execute()
             ->fetchAll();
     $key = 'id_' . $id;
-  } // Get all links.
+  }
+  // Get all links.
   elseif (empty($id) && empty($header) && empty($limit)) {
     $query = isset($words['empty']) ? $words['empty'] :
         db_select('word_link', 'wl')
@@ -381,7 +422,8 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
             ->execute()
             ->fetchAll();
     $key = 'empty';
-  } // Get links and extend query with pager and sort.
+  }
+  // Get links and extend query with pager and sort.
   else {
     $header_serialized = serialize($header);
     $query = isset($words['header'][$header_serialized]) ? $words['header'][$header_serialized] :
@@ -401,7 +443,8 @@ function word_link_get_link($id = NULL, $header = array(), $limit = NULL) {
   $links = array();
   if (isset($words['ready'][$key])) {
     $links = $words['ready'][$key];
-  } elseif (count($query) > 0) {
+  }
+  elseif (count($query) > 0) {
     foreach ($query as $value) {
       $links[$value->id] = $value;
     }
@@ -436,7 +479,8 @@ function word_link_word_exist($text, $id = 0) {
   }
   if (count($result) > 1) {
     return $result[0]->id;
-  } elseif (drupal_strtolower($text) == drupal_strtolower($result[0]->text)) {
+  }
+  elseif (drupal_strtolower($text) == drupal_strtolower($result[0]->text)) {
     return $result[0]->id;
   }
 
@@ -457,7 +501,8 @@ function word_link_word_exist($text, $id = 0) {
 function word_link_add_update_link($action, $values, $id = NULL) {
   if ($action == 'insert') {
     drupal_write_record('word_link', $values);
-  } elseif ($action == 'update') {
+  }
+  elseif ($action == 'update') {
     $values['id'] = $id;
     drupal_write_record('word_link', $values, 'id');
   }
@@ -488,7 +533,8 @@ function word_link_get_node_fields($type) {
   foreach ($fields as $name => $field) {
     if ($field['widget']['type'] == 'text_textarea_with_summary' || $field['widget']['type'] == 'text_textarea') {
       $text_fields[$field['field_name']] = $field['label'];
-    } elseif ($field['widget']['type'] == 'field_collection_embed') {
+    }
+    elseif ($field['widget']['type'] == 'field_collection_embed') {
       $fc_fields = field_info_instances('field_collection_item', $field['field_name']);
       foreach ($fc_fields as $fc_name => $fc_field) {
         if ($fc_field['widget']['type'] == 'text_textarea_with_summary' || $fc_field['widget']['type'] == 'text_textarea') {
