@@ -186,7 +186,7 @@ function word_link_process_node_fields(&$node, $types, $words) {
           // If output format is not HTML, then don’t do anything.
           if ($item['format'] != 'plain_text' && !empty($node->content[$field][$delta]['#markup'])) {
             // Change field value.
-            $cache_key = "word_link_nid_{$node->nid}_{$field}_{$delta}";
+            $cache_key = "word_link_nid_{$node->nid}_{$field}_{$delta}_" . strlen($node->content[$field][$delta]['#markup']);
             $cached = cache_get($cache_key);
             if (isset($cached->data)) {
               $node->content[$field][$delta]['#markup'] = $cached->data;
@@ -212,7 +212,7 @@ function word_link_process_node_fields(&$node, $types, $words) {
               foreach ($fc_field['#items'] as $fc_field_delta => $fc_field_value) {
                 // Change field value if output format is not plain text.
                 if ($fc_field_value['format'] != 'plain_text' && !empty($fc_field[$fc_field_delta]['#markup'])) {
-                  $cache_key = "word_link_nid_{$node->nid}_{$field}_{$fc_delta}";
+                  $cache_key = "word_link_nid_{$node->nid}_{$field}_{$fc_delta}_" . strlen($node->content[$field][$delta]['#markup']);
                   $cached = cache_get($cache_key);
                   if (isset($cached->data)) {
                     $value = $cached->data;
