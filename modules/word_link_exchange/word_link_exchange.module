@@ -203,14 +203,15 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       }
     }
   }
+  if (isset($form['taxonomy'])) {
+    if (empty($form_state['values']['import_limit']) || $form_state['values']['import_limit'] < 0) {
+      $messages['import_limit'] = t('Import limit must be positive integer.');
+    }
 
-  if (empty($form_state['values']['import_limit']) || $form_state['values']['import_limit'] < 0) {
-    $messages['import_limit'] = t('Import limit must be positive integer.');
-  }
-
-  if (empty($file) && empty($form_state['values']['vocabularies'])) {
-    $messages['vocabularies'] = t('Please select something.');
-    $messages['file'] = '';
+    if (empty($file) && empty($form_state['values']['vocabularies'])) {
+      $messages['vocabularies'] = t('Please select something.');
+      $messages['file'] = '';
+    }
   }
 
   // Set error messages.
