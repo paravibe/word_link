@@ -39,7 +39,7 @@ function word_link_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Disallowed HTML tags'),
     '#description' => t('A list of HTML tags that will be ignored. Never enter here tags that are not text. E.g. @tags.', array('@tags' => '<img>')),
-    '#default_value' => variable_get('word_link_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6>'),
+    '#default_value' => variable_get('word_link_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6> <code>'),
   );
   $form['word_link_add_form']['save'] = array(
     '#type' => 'submit',
@@ -63,30 +63,11 @@ function word_link_admin_settings_validate($form, &$form_state) {
  * Submit form for a settings page.
  */
 function word_link_admin_settings_submit($form, &$form_state) {
-  $types = $form_state['values']['word_link_settings']['word_link_node_types'];
-
-  foreach ($form_state['values']['word_link_settings']['word_link_node_types'] as $content => $type) {
-    $fields = array();
-    foreach ($type['fields'] as $field) {
-      if (preg_match('/.+__.+/', $field) != 0) {
-        $fc = explode('__', $field);
-        $fields[$fc[0]][$fc[1]] = $fc[1];
-      }
-      else {
-        $fields[$field] = $field;
-      }
-    }
-    $types[$content]['fields'] = $fields;
-  }
-
   // Set variables for word-link settings.
   variable_set('word_link_limit', $form_state['values']['word_link_settings']['word_link_limit']);
   variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
-  variable_set('word_link_node_types', $types);
   variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
   variable_set('word_link_highlight', $form_state['values']['word_link_settings']['word_link_highlight']);
-
-  cache_clear_all('word_link_nid_', 'cache', TRUE);
 
   drupal_set_message(t('Saved'));
 }
