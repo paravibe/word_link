@@ -110,6 +110,17 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 }
 
 /**
+ * Implements hook_init().
+ */
+function word_link_init() {
+  // Add style if need.
+  $css_status = variable_get('word_link_css', 1);
+  if ($css_status) {
+    drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+  }
+}
+
+/**
  * Implement hook_filter_info().
  */
 function word_link_filter_info() {
@@ -127,11 +138,6 @@ function word_link_filter_info() {
 function _word_link_process($text, $format) {
   $words = word_link_get_link();
   if (!empty($words)) {
-    // Add style if need.
-    $css_status = variable_get('word_link_css', 1);
-    if ($css_status) {
-      drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
-    }
     $text = word_link_replace_text($words, $text);
   }
 
@@ -232,7 +238,7 @@ function word_link_replace_text($words, $subject) {
       }
 
       // Build a patterns array.
-      $pattern = '/((\b)|(?<=\W))(' . preg_quote($word->text, '/') . ')(?!(.*<\/a>)|(".*>)|[\'"&’^])\b/u';
+      $pattern = '/((\b)|(?<=))(' . preg_quote($word->text, '/') . ')(?!(".*>)|[\'"&’^])\b/u';
       if ($word->case_sensitive) {
         $search[] = $pattern;
       }
