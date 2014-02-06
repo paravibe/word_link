@@ -546,7 +546,8 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
         $string .= $delimiter;
       }
       else {
-        $string .= '"' . str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value)) . '"';
+        $except = str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value));
+        $string .= !empty($except) ? $except : '""';
         $string .= $line_ending;
       }
     }
