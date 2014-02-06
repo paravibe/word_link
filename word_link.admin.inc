@@ -351,6 +351,14 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#description' => t('Use this to add a class for the link. Default value is "word-link".'),
     '#default_value' => isset($defaults[$id]->class) ? $defaults[$id]->class : 'word-link',
   );
+  $form['word_link_add_form']['rel'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rel'),
+    '#size' => 30,
+    '#maxlength' => 255,
+    '#description' => t('Use this to add a rel attribute for the link..'),
+    '#default_value' => isset($defaults[$id]->rel) ? $defaults[$id]->rel : '',
+  );
   $form['word_link_add_form']['visibility'] = array(
     '#type' => 'radios',
     '#title' => t('Show links on specific pages'),
@@ -388,14 +396,18 @@ function word_link_add_form_validate($form, &$form_state) {
     $normal_path = drupal_get_normal_path($form_state['values']['url']);
     $arg = empty($args[5]) ? 0 : $args[5];
     $exist = word_link_word_exist(trim($form_state['values']['text']), $arg);
+    $regex_validate = '/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/';
     if ($exist) {
       form_set_error('text', t('This word already exists.'));
     }
     if (!drupal_valid_path($normal_path)) {
       form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
     }
-    if (!empty($form_state['values']['class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($form_state['values']['class']))) {
+    if (!empty($form_state['values']['class']) && !preg_match($regex_validate, trim($form_state['values']['class']))) {
       form_set_error('class', t('Class is not valid.'));
+    }
+    if (!empty($form_state['values']['rel']) && !preg_match($regex_validate, trim($form_state['values']['rel']))) {
+      form_set_error('rel', t('Rel is not valid.'));
     }
   }
 }
@@ -422,6 +434,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'url' => trim($form_state['values']['url']),
     'url_title' => trim($form_state['values']['url_title']),
     'class' => trim($form_state['values']['class']),
+    'rel' => trim($form_state['values']['rel']),
     'visibility' => $form_state['values']['visibility'],
     'except' => trim($form_state['values']['except']),
   );

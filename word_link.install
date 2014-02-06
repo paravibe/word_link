@@ -71,6 +71,12 @@ function word_link_schema() {
         'not null' => TRUE,
         'default' => 'word-link',
       ),
+      'rel' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'visibility' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -102,5 +108,19 @@ function word_link_update_7001() {
         'size' => 'tiny',
       )
     );
+  }
+}
+
+/**
+ * Adding rel field.
+ */
+function word_link_update_7002() {
+  $schema = word_link_schema();
+  $field = 'rel';
+  $table = 'word_link';
+  
+  // Add the rel field to the db.
+  if (!db_field_exists($table, $field)) {
+    db_add_field($table, $field, $schema[$table]['fields'][$field]);
   }
 }
