@@ -184,7 +184,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       if (!isset($messages['delimiter_custom'])) {
         foreach ($content as $row) {
           $row = str_getcsv($row, $delimiter);
-          if (count($row) == 7) {
+          if (count($row) == 9) {
             $values[] = $value = array(
               'text' => $row[0],
               'case_sensitive' => $row[1],
@@ -192,7 +192,9 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
               'url_title' => $row[3],
               'class' => $row[4],
               'visibility' => $row[5],
-              'except' => $row[6],
+              'weight' => $row[6],
+              'rel' => $row[7],
+              'except' => $row[8],
             );
           }
           else {
@@ -278,7 +280,7 @@ function word_link_exchange_import_from_file($values, $update, &$context) {
     }
     elseif ($exist && $update) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      word_link_run_action('update', $value, $exist);
+      word_link_run_action('update', $value, $exist->id);
       $context['results']['updated']++;
     }
     $context['results']['processed']++;
@@ -465,6 +467,19 @@ function word_link_exchange_export_form_validate($form, &$form_state) {
  * Submit for export form.
  */
 function word_link_exchange_export_form_submit($form, &$form_state) {
+  // This is the order of columns for our file.
+  $values = array(
+    'text',
+    'case_sensitive',
+    'url',
+    'url_title',
+    'class',
+    'visibility',
+    'weight',
+    'rel',
+    'except',
+  );
+
   // Get all words from DB.
   $words = word_link_load_all();
   // Get right delimiter.
@@ -528,17 +543,9 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
     drupal_set_message(t('The file could not be created.'), 'error');
     return;
   }
+
   $operations = array();
   foreach ($words as $word) {
-    $values = array(
-      'text',
-      'case_sensitive',
-      'url',
-      'url_title',
-      'class',
-      'visibility',
-      'except',
-    );
     $string = '';
     foreach ($values as $value) {
       if ($value != 'except') {
