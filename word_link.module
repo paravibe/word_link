@@ -78,6 +78,11 @@ function word_link_menu() {
     'file' => 'word_link.admin.inc',
   );
 
+  $items['word-link/ajax/words'] = array(
+    'page callback' => 'word_link_words_autocomplete_callback',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('create word link'),
+  );
   return $items;
 }
 
@@ -441,4 +446,26 @@ function word_link_run_action($action, $values, $id = NULL) {
  */
 function word_link_delete($id) {
   db_delete('word_link')->condition('id', $id)->execute();
+}
+
+/**
+ * Autocomplete callback for words by text.
+
+ * @param string $string
+ *   The string that will be searched.
+ */
+function word_link_words_autocomplete_callback($string = "") {
+  $matches = array();
+  if ($string) {
+    $result = db_select('word_link', 'wl')
+      ->fields('wl', array('id', 'text'))
+      ->condition('text', db_like($string) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute();
+    foreach ($result as $word) {
+      $matches[$word->text . " ($word->id)"] = check_plain($word->text) . " ($word->id)";
+    }
+  }
+
+  drupal_json_output($matches);
 }
