@@ -270,15 +270,15 @@ function word_link_exchange_import_from_file($values, $update, &$context) {
     $context['results']['processed'] = 0;
   }
   foreach ($values as $value) {
-    $exist = word_link_word_exist($value['text']);
+    $exist = word_link_exists($value['text']);
     if (!$exist) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      word_link_add_update_link('insert', $value);
+      word_link_run_action('insert', $value);
       $context['results']['created']++;
     }
     elseif ($exist && $update) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      word_link_add_update_link('update', $value, $exist);
+      word_link_run_action('update', $value, $exist);
       $context['results']['updated']++;
     }
     $context['results']['processed']++;
@@ -307,7 +307,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
   }
   $tree = word_link_exchange_get_taxonomy_terms($vid, $context['sandbox']['progress'], $limit);
   foreach ($tree as $term) {
-    $exist = word_link_word_exist($term->name);
+    $exist = word_link_exists($term->name);
     if (!$exist) {
       $value = array(
         'text' => $term->name,
@@ -317,7 +317,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
         'visibility' => 0,
         'except' => NULL,
       );
-      word_link_add_update_link('insert', $value);
+      word_link_run_action('insert', $value);
       $context['results']['created']++;
     }
     $context['results']['processed']++;
@@ -466,7 +466,7 @@ function word_link_exchange_export_form_validate($form, &$form_state) {
  */
 function word_link_exchange_export_form_submit($form, &$form_state) {
   // Get all words from DB.
-  $links = word_link_get_link();
+  $words = word_link_load_all();
   // Get right delimiter.
   switch ($form_state['values']['delimiter']) {
     case 'comma':
@@ -529,7 +529,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
     return;
   }
   $operations = array();
-  foreach ($links as $link) {
+  foreach ($words as $word) {
     $values = array(
       'text',
       'case_sensitive',
@@ -542,11 +542,11 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
     $string = '';
     foreach ($values as $value) {
       if ($value != 'except') {
-        $string .= $link->$value;
+        $string .= $word->$value;
         $string .= $delimiter;
       }
       else {
-        $except = str_replace(array("\r\n", "\n", "\r"), '|', trim($link->$value));
+        $except = str_replace(array("\r\n", "\n", "\r"), '|', trim($word->$value));
         $string .= !empty($except) ? $except : '""';
         $string .= $line_ending;
       }

@@ -11,23 +11,12 @@ function word_link_install() {
   $t = get_t();
   drupal_set_message(
     $t(
-      'Word Link module succesfully installed. Visit the <a href="@link">configuration page</a>.',
+      'Word Link module succesfully installed. Pleae configure your text format. Visit the <a href="@link">configuration page</a>.',
       array(
-        '@link' => url('admin/config/content/word-link/configuration'),
+        '@link' => url('admin/config/content/formats'),
       )
     )
   );
-}
-
-/**
- * Implements of hook_uninstall().
- */
-function word_link_uninstall() {
-  variable_del('word_link_limit');
-  variable_del('word_link_tags_except');
-  variable_del('word_link_node_types');
-  variable_del('word_link_css');
-  variable_del('word_link_highlight');
 }
 
 /**

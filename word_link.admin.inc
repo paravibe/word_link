@@ -6,73 +6,6 @@
  */
 
 /**
- * Form builder for a settings page.
- */
-function word_link_admin_settings() {
-  $form['#tree'] = TRUE;
-  $form['word_link_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Settings'),
-    '#collapsible' => FALSE,
-  );
-  $form['word_link_settings']['word_link_css'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Add default CSS'),
-    '#description' => t('If turned on default CSS from module will be added.'),
-    '#default_value' => variable_get('word_link_css', 1),
-  );
-  $form['word_link_settings']['word_link_highlight'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Highlight words.'),
-    '#description' => t('Highlight found words instead of replace it to links.'),
-    '#default_value' => variable_get('word_link_highlight', 0),
-  );
-  $form['word_link_settings']['word_link_limit'] = array(
-    '#type' => 'textfield',
-    '#size' => 5,
-    '#maxlenghth' => 3,
-    '#title' => t('Convert limit'),
-    '#description' => t('Set the maxium instances that will be converted. Use 0 if you want all instances in the node to be converted.'),
-    '#default_value' => variable_get('word_link_limit', 0),
-  );
-  $form['word_link_settings']['word_link_tags_except'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Disallowed HTML tags'),
-    '#description' => t('A list of HTML tags that will be ignored. Never enter here tags that are not text. E.g. @tags.', array('@tags' => '<img>')),
-    '#default_value' => variable_get('word_link_tags_except', '<h1> <h2> <h3> <h4> <h5> <h6> <code>'),
-  );
-  $form['word_link_add_form']['save'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-
-  return $form;
-}
-
-/**
- * Form validation for a settings page.
- */
-function word_link_admin_settings_validate($form, &$form_state) {
-  $limit = $form_state['values']['word_link_settings']['word_link_limit'];
-  if (!is_numeric($limit) || (int) $limit < 0) {
-    form_set_error('word_link_settings][word_link_limit', t('Replace limit must be numeric.'));
-  }
-}
-
-/**
- * Submit form for a settings page.
- */
-function word_link_admin_settings_submit($form, &$form_state) {
-  // Set variables for word-link settings.
-  variable_set('word_link_limit', $form_state['values']['word_link_settings']['word_link_limit']);
-  variable_set('word_link_tags_except', $form_state['values']['word_link_settings']['word_link_tags_except']);
-  variable_set('word_link_css', $form_state['values']['word_link_settings']['word_link_css']);
-  variable_set('word_link_highlight', $form_state['values']['word_link_settings']['word_link_highlight']);
-
-  drupal_set_message(t('Saved'));
-}
-
-/**
  * Buid a Word Link list page.
  */
 function word_link_list_page_form($form, $form_state) {
@@ -94,7 +27,7 @@ function word_link_list_page_form($form, $form_state) {
   );
 
   // Get words from DB.
-  $words = word_link_get_link(NULL, $header, 50);
+  $words = word_link_load_table($header, 50);
 
   $destination = drupal_get_destination();
   $options = array();
@@ -220,7 +153,8 @@ function word_link_list_page_form_delete_confirm($form, &$form_state, $words) {
 function word_link_list_page_form_delete_confirm_submit($form, &$form_state) {
   foreach ($form_state['values']['words'] as $wid) {
     if (!empty($wid) && is_numeric($wid)) {
-      word_link_del_link($wid);
+      word_link_delete($wid);
+      cache_clear_all('*', 'cache_filter', TRUE);
     }
   }
 }
@@ -236,7 +170,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#collapsed' => FALSE,
   );
   if (!empty($id)) {
-    $defaults = word_link_get_link($id);
+    $defaults = word_link_load($id);
     $form['word_link_add_form']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete'),
@@ -251,13 +185,13 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#maxlength' => 255,
     '#description' => t('The word or phrase you wish to convert to a link. This field is case sensitive.'),
     '#required' => TRUE,
-    '#default_value' => !empty($defaults[$id]->text) ? $defaults[$id]->text : '',
+    '#default_value' => !empty($defaults->text) ? $defaults->text : '',
   );
   $form['word_link_add_form']['case_sensitive'] = array(
     '#type' => 'checkbox',
     '#title' => t('Case Sensitivity'),
     '#description' => t('By default Word Link are case sensitive. Uncheck this checkbox if you want this particular Word Link to be case insensitive.'),
-    '#default_value' => isset($defaults[$id]->case_sensitive) ? (int) $defaults[$id]->case_sensitive : 1,
+    '#default_value' => isset($defaults->case_sensitive) ? (int) $defaults->case_sensitive : 1,
   );
   $form['word_link_add_form']['url'] = array(
     '#type' => 'textfield',
@@ -266,7 +200,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#maxlength' => 255,
     '#description' => t('The URL of the page to link to. External links must start with %http or %https and will be open in new window.', array('%http' => 'http://', '%https' => 'https://')),
     '#required' => TRUE,
-    '#default_value' => isset($defaults[$id]->url) ? $defaults[$id]->url : '',
+    '#default_value' => isset($defaults->url) ? $defaults->url : '',
   );
   $form['word_link_add_form']['url_title'] = array(
     '#type' => 'textfield',
@@ -274,7 +208,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#size' => 30,
     '#maxlength' => 255,
     '#description' => t('Title for the above URL. It will be embedded in the created link and appear as a tooltip when hovering the mouse over the link.'),
-    '#default_value' => isset($defaults[$id]->url_title) ? $defaults[$id]->url_title : '',
+    '#default_value' => isset($defaults->url_title) ? $defaults->url_title : '',
   );
   $form['word_link_add_form']['class'] = array(
     '#type' => 'textfield',
@@ -282,7 +216,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#size' => 30,
     '#maxlength' => 255,
     '#description' => t('Use this to add a class for the link. Default value is "word-link".'),
-    '#default_value' => isset($defaults[$id]->class) ? $defaults[$id]->class : 'word-link',
+    '#default_value' => isset($defaults->class) ? $defaults->class : 'word-link',
   );
   $form['word_link_add_form']['visibility'] = array(
     '#type' => 'radios',
@@ -291,12 +225,12 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
       0 => t('All pages except those listed'),
       1 => t('Only the listed pages'),
     ),
-    '#default_value' => isset($defaults[$id]->visibility) ? $defaults[$id]->visibility : 0,
+    '#default_value' => isset($defaults->visibility) ? $defaults->visibility : 0,
   );
   $form['word_link_add_form']['except'] = array(
     '#type' => 'textarea',
     '#description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
-    '#default_value' => isset($defaults[$id]->except) ? $defaults[$id]->except : '',
+    '#default_value' => isset($defaults->except) ? $defaults->except : '',
   );
   $form['word_link_add_form']['id'] = array(
     '#type' => 'hidden',
@@ -320,7 +254,7 @@ function word_link_add_form_validate($form, &$form_state) {
     $args = arg();
     $normal_path = drupal_get_normal_path($form_state['values']['url']);
     $arg = empty($args[5]) ? 0 : $args[5];
-    $exist = word_link_word_exist(trim($form_state['values']['text']), $arg);
+    $exist = word_link_exists(trim($form_state['values']['text']), $arg);
     if ($exist) {
       form_set_error('text', t('This word already exists.'));
     }
@@ -342,6 +276,7 @@ function word_link_add_form_delete_submit($form, &$form_state) {
     $destination = drupal_get_destination();
     unset($_GET['destination']);
   }
+  cache_clear_all('*', 'cache_filter', TRUE);
   $form_state['redirect'] = array('admin/config/content/word-link/delete/' . $form_state['values']['id'], array('query' => $destination));
 }
 
@@ -359,33 +294,36 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'except' => trim($form_state['values']['except']),
   );
   if (isset($form_state['values']['id'])) {
-    word_link_add_update_link('update', $values, $form_state['values']['id']);
+    word_link_run_action('update', $values, $form_state['values']['id']);
     drupal_set_message(t('Done'));
   }
   else {
-    word_link_add_update_link('insert', $values);
+    word_link_run_action('insert', $values);
     drupal_set_message(t('Link succesfuly added'));
   }
+
+  cache_clear_all('*', 'cache_filter', TRUE);
+
   $form_state['redirect'] = 'admin/config/content/word-link/list';
 }
 
 /**
  * Form builder for delete confirm page.
  */
-function word_link_del_form($form, &$form_state, $id) {
-  $form['word_link_del_form']['message'] = array(
+function word_link_delete_form($form, &$form_state, $id) {
+  $form['word_link_delete_form']['message'] = array(
     '#markup' => t('This action cannot be undone.'),
     '#prefix' => '<div class="form-item">',
     '#suffix' => '</div>',
   );
-  $form['word_link_del_form']['delete'] = array(
+  $form['word_link_delete_form']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
   );
-  $form['word_link_del_form']['cancel'] = array(
+  $form['word_link_delete_form']['cancel'] = array(
     '#markup' => l(t('Cancel'), 'admin/config/content/word-link/list'),
   );
-  $form['word_link_del_form']['id'] = array(
+  $form['word_link_delete_form']['id'] = array(
     '#type' => 'hidden',
     '#value' => $id,
   );
@@ -396,7 +334,8 @@ function word_link_del_form($form, &$form_state, $id) {
 /**
  * Submit form for delete confirm page.
  */
-function word_link_del_form_submit($form, &$form_state) {
-  word_link_del_link($form_state['values']['id']);
+function word_link_delete_form_submit($form, &$form_state) {
+  word_link_delete($form_state['values']['id']);
+  cache_clear_all('*', 'cache_filter', TRUE);
   $form_state['redirect'] = 'admin/config/content/word-link/list';
 }
