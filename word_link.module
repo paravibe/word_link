@@ -290,6 +290,7 @@ function word_link_convert_text($words, $text, $settings) {
             'title' => $words[$text_lower]->url_title,
             'class' => $words[$text_lower]->class,
             'target' => $target,
+            'rel' => $words[$text_lower]->rel,
           );
 
           if ($settings['word_link_highlight']) {

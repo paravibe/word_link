@@ -231,6 +231,14 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#description' => t('Use this to add a class for the link. Default value is "word-link".'),
     '#default_value' => isset($defaults->class) ? $defaults->class : 'word-link',
   );
+  $form['word_link_add_form']['rel'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Relationship'),
+    '#size' => 30,
+    '#maxlength' => 30,
+    '#description' => t('Use this to add a rel attribute to the link.'),
+    '#default_value' => isset($defaults->rel) ? $defaults->rel : '',
+  );
   $form['word_link_add_form']['visibility'] = array(
     '#type' => 'radios',
     '#title' => t('Show links on specific pages'),
@@ -307,6 +315,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'visibility' => $form_state['values']['visibility'],
     'except' => trim($form_state['values']['except']),
     'weight' => $form_state['values']['weight'],
+    'rel' => $form_state['values']['rel'],
   );
   if (isset($form_state['values']['id'])) {
     word_link_run_action('update', $values, $form_state['values']['id']);
