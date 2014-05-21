@@ -118,7 +118,7 @@ function word_link_theme() {
     'word_link' => array(
       'variables' => array(
         'text' => NULL,
-        'highlight' => FALSE,
+        'tag' => NULL,
         'attributes' => array(),
       ),
       'file' => 'theme/word_link.theme.inc',
@@ -211,6 +211,9 @@ function _word_link_process($text, $filter) {
  *   String with converted words.
  */
 function word_link_convert_text($words, $text, $settings) {
+  // Default HTML tag used in theme.
+  $tag = 'a';
+
   // Add css if enabled.
   // @todo: Find a better place for adding css. This works only once.
   if ($settings['word_link_add_css']) {
@@ -282,7 +285,6 @@ function word_link_convert_text($words, $text, $settings) {
           $link = $dom->createDocumentFragment();
 
           $target = url_is_external($words[$text_lower]->url) ? '_blank' : '';
-
           $attributes = array(
             'href' => url($words[$text_lower]->url),
             'title' => $words[$text_lower]->url_title,
@@ -290,12 +292,17 @@ function word_link_convert_text($words, $text, $settings) {
             'target' => $target,
           );
 
+          if ($settings['word_link_highlight']) {
+            $tag = 'span';
+            unset($attributes['href'], $attributes['target'], $attributes['rel']);
+          }
+
           $link->appendXML(
             theme(
               'word_link',
               array(
                 'text' => $match_text,
-                'highlight' => $settings['word_link_highlight'],
+                'tag' => $tag,
                 'attributes' => array_filter($attributes),
               )
             )
