@@ -84,10 +84,9 @@ function word_link_schema() {
 }
 
 /**
- * Adding visibility field.
+ * Adding a visibility column.
  */
 function word_link_update_7001() {
-  // Add the visibility field to the db.
   if (!db_field_exists('word_link', 'visibility')) {
     db_add_field('word_link', 'visibility',
       array(
@@ -101,7 +100,7 @@ function word_link_update_7001() {
 }
 
 /**
- * Adding weight field.
+ * Adding a weight column.
  */
 function word_link_update_7002() {
   if (!db_field_exists('word_link', 'weight')) {
