@@ -187,8 +187,8 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#maxlength' => 255,
     '#description' => t('The word or phrase you wish to convert to a link. This field is case sensitive.'),
     '#required' => TRUE,
-    '#default_value' => !empty($defaults->text) ? $defaults->text : '',
     '#autocomplete_path' => 'word-link/ajax/words',
+    '#default_value' => !empty($defaults->text) ? $defaults->text : '',
   );
   $form['word_link_add_form']['weight'] = array(
     '#type' => 'textfield',
@@ -212,6 +212,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#maxlength' => 255,
     '#description' => t('The URL of the page to link to. External links must start with %http or %https and will be open in new window.', array('%http' => 'http://', '%https' => 'https://')),
     '#required' => TRUE,
+    '#autocomplete_path' => 'word-link/ajax/urls',
     '#default_value' => isset($defaults->url) ? $defaults->url : '',
   );
   $form['word_link_add_form']['url_title'] = array(

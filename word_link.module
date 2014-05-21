@@ -83,6 +83,13 @@ function word_link_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('create word link'),
   );
+
+  $items['word-link/ajax/urls'] = array(
+    'page callback' => 'word_link_urls_autocomplete_callback',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('create word link'),
+  );
+
   return $items;
 }
 
@@ -274,10 +281,13 @@ function word_link_convert_text($words, $text, $settings) {
 
           $link = $dom->createDocumentFragment();
 
+          $target = url_is_external($words[$text_lower]->url) ? '_blank' : '';
+
           $attributes = array(
-            'href' => $words[$text_lower]->url,
+            'href' => url($words[$text_lower]->url),
             'title' => $words[$text_lower]->url_title,
             'class' => $words[$text_lower]->class,
+            'target' => $target,
           );
 
           $link->appendXML(
@@ -464,6 +474,54 @@ function word_link_words_autocomplete_callback($string = "") {
       ->execute();
     foreach ($result as $word) {
       $matches[$word->text . " ($word->id)"] = check_plain($word->text) . " ($word->id)";
+    }
+  }
+
+  drupal_json_output($matches);
+}
+
+/**
+ * Autocomplete callback for words by urls.
+
+ * @param string $string
+ *   The string that will be searched.
+ */
+function word_link_urls_autocomplete_callback($string = "") {
+  $matches = array();
+  if ($string) {
+    $node_query = db_select('node', 'n');
+    $node_query->addField('n', 'nid', 'id');
+    $node_query->addField('n', 'title', 'string');
+    $node_query->condition('status', 1, '=');
+    $node_query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $node_query->range(0, 10);
+    $nodes = $node_query->execute()->fetchAllAssoc('id');
+
+    $user_query = db_select('users', 'u');
+    $user_query->addField('u', 'uid', 'id');
+    $user_query->addField('u', 'name', 'string');
+    $user_query->condition('status', 1, '=');
+    $user_query->condition('u.name', db_like($string) . '%', 'LIKE');
+    $user_query->range(0, 10);
+    $users = $user_query->execute()->fetchAllAssoc('id');
+
+    $term_query = db_select('taxonomy_term_data', 't');
+    $term_query->addField('t', 'tid', 'id');
+    $term_query->addField('t', 'name', 'string');
+    $term_query->condition('t.name', db_like($string) . '%', 'LIKE');
+    $term_query->range(0, 10);
+    $terms = $term_query->execute()->fetchAllAssoc('id');
+
+    $results = array(
+      'node' => $nodes,
+      'user' => $users,
+      'taxonomy/term' => $terms,
+    );
+
+    foreach ($results as $path => $items) {
+      foreach ($items as $item) {
+        $matches[$path . '/' . $item->id] = check_plain($item->string) . " ($item->id)";
+      }
     }
   }
 
