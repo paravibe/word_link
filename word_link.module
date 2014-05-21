@@ -220,7 +220,7 @@ function word_link_convert_text($words, $text, $settings) {
   $current_path = current_path();
 
   // Create pattern.
-  $pattern = '';
+  $pattern = array();
   foreach ($words as $word) {
     $url = drupal_get_path_alias($word->url);
     $match = FALSE;
@@ -318,7 +318,20 @@ function word_link_load_all() {
     $query = db_select('word_link', 'wl');
     $query->addExpression('LOWER(wl.text)', 'text_lower');
     $query->fields('wl');
-    $words = $query->execute()->fetchAllAssoc('text_lower');
+    $query->orderBy('wl.weight');
+    $results = $query->execute();
+
+    $words = array();
+    foreach ($results as $word) {
+      if (isset($words[$word->text_lower])) {
+        if ($words[$word->text_lower]->weight >= $word->weight) {
+          $words[$word->text_lower] = $word;
+        }
+      }
+      else {
+        $words[$word->text_lower] = $word;
+      }
+    }
   }
 
   return $words;

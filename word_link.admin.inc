@@ -17,6 +17,7 @@ function word_link_list_page_form($form, $form_state) {
   // Build the sortable table header.
   $header = array(
     'id' => array('data' => t('id'), 'field' => 'wl.id', 'sort' => 'desc'),
+    'weight' => array('data' => t('weight'), 'field' => 'wl.weight'),
     'text' => array('data' => t('Text'), 'field' => 'wl.text'),
     'case_sensitive' => array('data' => t('Case sensitive'), 'field' => 'wl.case_sensitive'),
     'url' => array('data' => t('URL'), 'field' => 'wl.url'),
@@ -38,6 +39,7 @@ function word_link_list_page_form($form, $form_state) {
     }
     $options[$word->id] = array(
       'id' => $delta,
+      'weight' => $word->weight,
       'text' => check_plain($word->text),
       'case_sensitive' => $word->case_sensitive ? t('Yes') : t('No'),
       'url' => array(
@@ -187,6 +189,15 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#required' => TRUE,
     '#default_value' => !empty($defaults->text) ? $defaults->text : '',
   );
+  $form['word_link_add_form']['weight'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Weight'),
+    '#size' => 3,
+    '#maxlength' => 3,
+    '#description' => t('Weight of the word. Lighter weights are higher up, heavier weights go down.'),
+    '#required' => TRUE,
+    '#default_value' => !empty($defaults->weight) ? $defaults->weight : 0,
+  );
   $form['word_link_add_form']['case_sensitive'] = array(
     '#type' => 'checkbox',
     '#title' => t('Case Sensitivity'),
@@ -293,6 +304,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'class' => trim($form_state['values']['class']),
     'visibility' => $form_state['values']['visibility'],
     'except' => trim($form_state['values']['except']),
+    'weight' => $form_state['values']['weight'],
   );
   if (isset($form_state['values']['id'])) {
     word_link_run_action('update', $values, $form_state['values']['id']);
@@ -300,7 +312,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
   }
   else {
     word_link_run_action('insert', $values);
-    drupal_set_message(t('Link succesfuly added'));
+    drupal_set_message(t('Word successfully added'));
   }
 
   cache_clear_all('*', 'cache_filter', TRUE);
