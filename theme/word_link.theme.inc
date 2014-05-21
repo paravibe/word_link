@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Theme for word_link.
+ */
+
+/**
  * Render a word_link link.
  */
 function theme_word_link($vars) {

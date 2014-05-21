@@ -272,14 +272,7 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
  */
 function word_link_add_form_validate($form, &$form_state) {
   if ($form_state['values']['op'] == t('Save')) {
-    // @todo: Check if we need this verify.
-//    $args = arg();
     $normal_path = drupal_get_normal_path($form_state['values']['url']);
-//    $arg = empty($args[5]) ? 0 : $args[5];
-//    $exist = word_link_exists(trim($form_state['values']['text']), $arg);
-//    if ($exist) {
-//      form_set_error('text', t('This word already exists.'));
-//    }
     if (!drupal_valid_path($normal_path)) {
       form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $form_state['values']['url'])));
     }

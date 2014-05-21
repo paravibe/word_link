@@ -20,7 +20,7 @@ function word_link_install() {
 }
 
 /**
- * Implements of hook_schema().
+ * Implements hook_schema().
  */
 function word_link_schema() {
   $schema['word_link'] = array(

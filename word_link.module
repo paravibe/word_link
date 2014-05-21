@@ -127,7 +127,7 @@ function word_link_theme() {
 }
 
 /**
- * Implement hook_filter_info().
+ * Implements hook_filter_info().
  */
 function word_link_filter_info() {
   $filters['word_link'] = array(
@@ -140,6 +140,7 @@ function word_link_filter_info() {
       'word_link_highlight' => FALSE,
       'word_link_limit' => 0,
       'word_link_tags_except' => '<h1> <h2> <h3> <h4> <h5> <h6> <code>',
+      'word_link_content_types' => array(),
     ),
     'weight' => 15,
   );
@@ -181,6 +182,13 @@ function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
     '#description' => t('A list of HTML tags that will be ignored. Never enter here tags that are not text. E.g. @tags.', array('@tags' => '<img>')),
     '#default_value' => $filter->settings['word_link_tags_except'],
   );
+  $settings['word_link_content_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Content types'),
+    '#description' => t('Choose content types in which words will be converted.'),
+    '#options' => node_type_get_names(),
+    '#default_value' => $filter->settings['word_link_content_types'],
+  );
 
   return $settings;
 }
@@ -211,6 +219,23 @@ function _word_link_process($text, $filter) {
  *   String with converted words.
  */
 function word_link_convert_text($words, $text, $settings) {
+  // Get current path. We need this to verify
+  // if word will be converted on this page.
+  $current_path = current_path();
+  $args = arg();
+
+  // Check if current node belongs to content type
+  // in which need to convert words.
+  // @todo: Need to check when show node on another path.
+  if (isset($args[0]) && $args[0] == 'node' && isset($args[1])) {
+    $nodes = word_link_get_node_types();
+    $type = isset($nodes[$args[1]]) ? $nodes[$args[1]]->type : NULL;
+
+    if (in_array($type, $settings['word_link_content_types']) && !$settings['word_link_content_types'][$type]) {
+      return $text;
+    }
+  }
+
   // Default HTML tag used in theme.
   $tag = 'a';
 
@@ -230,11 +255,8 @@ function word_link_convert_text($words, $text, $settings) {
     $disallowed = implode(' ', $disallowed);
   }
 
-  // Get path alias and current path. We need this to verify if word will be converted.
-  $path = drupal_strtolower(drupal_get_path_alias());
-  $current_path = current_path();
-
   // Create pattern.
+  $path = drupal_strtolower(drupal_get_path_alias());
   $pattern = array();
   foreach ($words as $word) {
     $url = drupal_get_path_alias($word->url);
@@ -329,9 +351,28 @@ function word_link_convert_text($words, $text, $settings) {
 }
 
 /**
+ * Gets all nodes and their types.
+ *
+ * @return mixed
+ *   Array of nodes indexed by nid.
+ */
+function word_link_get_node_types() {
+  $nodes = &drupal_static(__FUNCTION__);
+
+  if (!isset($nodes)) {
+    $query = db_select('node', 'n')
+      ->fields('n', array('nid', 'type'));
+
+    $nodes = $query->execute()->fetchAllAssoc('nid');
+  }
+
+  return $nodes;
+}
+
+/**
  * Loads words from the database.
  *
- * @return
+ * @return array
  *   An array of words objects indexed by text.
  */
 function word_link_load_all() {
@@ -361,10 +402,12 @@ function word_link_load_all() {
 }
 
 /**
- * @param $id
+ * Load link by its id.
+ *
+ * @param int $id
  *   The word ID.
  *
- * @return
+ * @return mixed
  *   A fully-populated word object, or FALSE if the word is not found.
  */
 function word_link_load($id) {
@@ -390,7 +433,7 @@ function word_link_load($id) {
  * @param int $limit
  *   (optional) determines the number of fields to get.
  *
- * @return array
+ * @return mixed
  *   An array of word objects indexed by id.
  */
 function word_link_load_table($header = array(), $limit = NULL) {
@@ -442,7 +485,7 @@ function word_link_exists($text, $id = 0) {
  * @param int $id
  *   (optional) ID of the word.
  *
- * @return
+ * @return mixed
  *   If the record insert or update failed, returns FALSE. If it succeeded,
  *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
  */
@@ -468,7 +511,7 @@ function word_link_delete($id) {
 
 /**
  * Autocomplete callback for words by text.
-
+ *
  * @param string $string
  *   The string that will be searched.
  */
@@ -490,7 +533,7 @@ function word_link_words_autocomplete_callback($string = "") {
 
 /**
  * Autocomplete callback for words by urls.
-
+ *
  * @param string $string
  *   The string that will be searched.
  */
