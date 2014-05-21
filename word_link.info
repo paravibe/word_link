@@ -1,4 +1,4 @@
 name = Word Link
 description = Allows users to convert defined words to links.
 core = 7.x
-configure = admin/config/content/word-link/configuration
+configure = admin/config/content/formats
