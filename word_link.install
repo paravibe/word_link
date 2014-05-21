@@ -71,6 +71,12 @@ function word_link_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'weight' => array(
+        'description' => 'Weight of the word. Lighter weights are higher up, heavier weights go down.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
   );
@@ -89,6 +95,22 @@ function word_link_update_7001() {
         'not null' => TRUE,
         'default' => 0,
         'size' => 'tiny',
+      )
+    );
+  }
+}
+
+/**
+ * Adding weight field.
+ */
+function word_link_update_7002() {
+  if (!db_field_exists('word_link', 'weight')) {
+    db_add_field('word_link', 'weight',
+      array(
+        'description' => 'Weight of the word. Lighter weights are higher up, heavier weights go down.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
       )
     );
   }
