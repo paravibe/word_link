@@ -138,7 +138,6 @@ function word_link_filter_info() {
     'default settings' => array(
       'word_link_add_css' => TRUE,
       'word_link_highlight' => FALSE,
-      'word_link_limit' => 0,
       'word_link_tags_except' => '<h1> <h2> <h3> <h4> <h5> <h6> <code>',
       'word_link_content_types' => array(),
     ),
@@ -166,15 +165,6 @@ function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
     '#title' => t('Highlight words.'),
     '#description' => t('Highlight found words instead of replace it to links.'),
     '#default_value' => $filter->settings['word_link_highlight'],
-  );
-  $settings['word_link_limit'] = array(
-    '#type' => 'textfield',
-    '#size' => 5,
-    '#maxlenghth' => 3,
-    '#element_validate' => array('element_validate_integer'),
-    '#title' => t('Convert limit'),
-    '#description' => t('Set the maxium instances that will be converted. Use 0 if you want all instances in the node to be converted.'),
-    '#default_value' => $filter->settings['word_link_limit'],
   );
   $settings['word_link_tags_except'] = array(
     '#type' => 'textfield',
@@ -226,7 +216,7 @@ function word_link_convert_text($words, $text, $settings) {
 
   // Check if current node belongs to content type
   // in which need to convert words.
-  // @todo: Need to check when show node on another path.
+  // @todo: Need to check when node shows on another path.
   if (isset($args[0]) && $args[0] == 'node' && isset($args[1])) {
     $nodes = word_link_get_node_types();
     $type = isset($nodes[$args[1]]) ? $nodes[$args[1]]->type : NULL;
