@@ -20,6 +20,13 @@ function word_link_install() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function word_link_uninstall() {
+  variable_del('word_link_add_css');
+}
+
+/**
  * Implements hook_schema().
  */
 function word_link_schema() {

@@ -48,6 +48,17 @@ function word_link_menu() {
     'file' => 'word_link.admin.inc',
   );
 
+  $items['admin/config/content/word-link/configuration'] = array(
+    'title' => 'Configuration',
+    'description' => 'Set the preferences for Word Link module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('word_link_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'word_link.admin.inc',
+    'weight' => 2,
+  );
+
   $items['admin/config/content/word-link/add'] = array(
     'title' => 'Add new word',
     'description' => 'Add word',
@@ -111,6 +122,16 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 }
 
 /**
+ * Implements hook_init().
+ */
+function word_link_init() {
+  // Add css if enabled.
+  if (variable_get('word_link_add_css', 1)) {
+    drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
+  }
+}
+
+/**
  * Implements hook_theme().
  */
 function word_link_theme() {
@@ -154,12 +175,6 @@ function word_link_filter_info() {
 function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
   $filter->settings += $defaults;
 
-  $settings['word_link_add_css'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Add default CSS'),
-    '#description' => t('If turned on default CSS from module will be added.'),
-    '#default_value' => $filter->settings['word_link_add_css'],
-  );
   $settings['word_link_highlight'] = array(
     '#type' => 'checkbox',
     '#title' => t('Highlight words.'),
@@ -228,12 +243,6 @@ function word_link_convert_text($words, $text, $settings) {
 
   // Default HTML tag used in theme.
   $tag = 'a';
-
-  // Add css if enabled.
-  // @todo: Find a better place for adding css. This works only once.
-  if ($settings['word_link_add_css']) {
-    drupal_add_css(drupal_get_path('module', 'word_link') . '/css/word_link.css');
-  }
 
   // Get disallowed html tags and convert it for Xpath.
   if (!empty($settings['word_link_tags_except'])) {

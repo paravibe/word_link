@@ -6,6 +6,20 @@
  */
 
 /**
+ * Form builder for a settings page.
+ */
+function word_link_admin_settings() {
+  $form['word_link_add_css'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add default CSS'),
+    '#description' => t('If turned on default CSS from module will be added.'),
+    '#default_value' => variable_get('word_link_add_css', 1),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Buid a Word Link list page.
  */
 function word_link_list_page_form($form, $form_state) {
@@ -157,6 +171,7 @@ function word_link_list_page_form_delete_confirm_submit($form, &$form_state) {
     if (!empty($wid) && is_numeric($wid)) {
       word_link_delete($wid);
       cache_clear_all('*', 'cache_filter', TRUE);
+      field_cache_clear();
     }
   }
 }

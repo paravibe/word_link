@@ -383,6 +383,8 @@ function word_link_exchange_get_taxonomy_terms($vid, $from, $limit) {
  */
 function word_link_exchange_import_batch_finish($success, $results, $operations) {
   if ($success) {
+    cache_clear_all('*', 'cache_filter', TRUE);
+    field_cache_clear();
     drupal_set_message(format_plural($results['created'], 'One word imported.', '@count words imported.'));
     if (isset($results['updated'])) {
       drupal_set_message(format_plural($results['updated'], 'One word updated.', '@count words updated.'));
