@@ -157,8 +157,8 @@ function word_link_filter_info() {
     'process callback' => '_word_link_process',
     'settings callback' => '_word_link_settings',
     'default settings' => array(
-      'word_link_add_css' => TRUE,
       'word_link_highlight' => FALSE,
+      'word_link_boundary' => FALSE,
       'word_link_tags_except' => '<h1> <h2> <h3> <h4> <h5> <h6> <code>',
       'word_link_content_types' => array(),
     ),
@@ -180,6 +180,12 @@ function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
     '#title' => t('Highlight words.'),
     '#description' => t('Highlight found words instead of replace it to links.'),
     '#default_value' => $filter->settings['word_link_highlight'],
+  );
+  $settings['word_link_boundary'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Word boundary'),
+    '#description' => t('If enabled all words will be converted, even those that are not wrapped by spaces.'),
+    '#default_value' => $filter->settings['word_link_boundary'],
   );
   $settings['word_link_tags_except'] = array(
     '#type' => 'textfield',
@@ -277,7 +283,12 @@ function word_link_convert_text($words, $text, $settings) {
       $pattern[] = preg_replace('/ /', '\\s+', preg_quote($text_lower));
     }
   }
-  $pattern  = '/((\b)|(?<=))(' . implode('|', $pattern) . ')\b/ui';
+  if ($settings['word_link_boundary']) {
+    $pattern  = '/(?<=)(' . implode('|', $pattern) . ')/ui';
+  }
+  else {
+    $pattern = '/((\b)|(?<=))(' . implode('|', $pattern) . ')\b/ui';
+  }
 
   // Create DOM object.
   $dom = filter_dom_load($text);
