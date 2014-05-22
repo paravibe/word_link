@@ -347,9 +347,7 @@ function word_link_convert_text($words, $text, $settings) {
         else {
           $prefix = substr($text, $offset, $match_pos - $offset);
           $parent->insertBefore($dom->createTextNode($prefix), $next);
-          $old_text = $dom->createDocumentFragment();
-          $old_text->appendXML($match_text);
-          $parent->insertBefore($old_text, $next);
+          $parent->insertBefore($dom->createTextNode($match_text), $next);
           $offset = $match_pos + strlen($match_text);
         }
 
