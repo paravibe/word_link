@@ -280,7 +280,7 @@ function word_link_convert_text($words, $text, $settings) {
 
     if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
       $text_lower = preg_replace('/\s+/', ' ', trim($word->text_lower));
-      $pattern[] = preg_replace('/ /', '\\s+', preg_quote($text_lower));
+      $pattern[] = preg_replace('/ /', '\\s+', preg_quote($text_lower, '/'));
     }
   }
   if ($settings['word_link_boundary']) {
