@@ -297,7 +297,7 @@ function word_link_exchange_import_from_file($values, $update, $case_sensitive, 
     $context['results']['processed'] = 0;
   }
   foreach ($values as $value) {
-    $value->case_sensitive = $case_sensitive !== 'default' ? $case_sensitive : $value->case_sensitive;
+    $value['case_sensitive'] = $case_sensitive !== 'default' ? $case_sensitive : $value['case_sensitive'];
     $exist = word_link_exists($value['text']);
     if (!$exist) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
