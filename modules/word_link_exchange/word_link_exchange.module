@@ -64,6 +64,24 @@ function word_link_exchange_import_form() {
     'custom_delimiter' => t('Custom delimiter'),
   );
 
+  $form['override_defaults'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Override defaults'),
+  );
+  $form['override'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="override_defaults"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['override']['case_sensitive'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Case sensitive'),
+  );
+
+
   // Show import from taxonomy only when we have vocabularies.
   if (!empty($vocabularies)) {
     $vids = array();
@@ -230,6 +248,11 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
 function word_link_exchange_import_form_submit($form, &$form_state) {
   $operations = array();
 
+  $case_sensitive = 'default';
+  if ($form_state['values']['override_defaults']) {
+    $case_sensitive = $form_state['values']['case_sensitive'];
+  }
+
   // Set batch operation when import from file.
   if (!empty($form_state['values']['file'])) {
     $operations[] = array(
@@ -237,6 +260,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
       array(
         $form_state['values']['file'],
         $form_state['values']['update'],
+        $case_sensitive,
       ),
     );
   }
@@ -249,6 +273,7 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
         array(
           $vid,
           $form_state['values']['import_limit'],
+          $case_sensitive,
         ),
       );
     }
@@ -265,13 +290,14 @@ function word_link_exchange_import_form_submit($form, &$form_state) {
 /**
  * Import links from file to DB.
  */
-function word_link_exchange_import_from_file($values, $update, &$context) {
+function word_link_exchange_import_from_file($values, $update, $case_sensitive, &$context) {
   if (empty($context['results'])) {
     $context['results']['created'] = 0;
     $context['results']['updated'] = 0;
     $context['results']['processed'] = 0;
   }
   foreach ($values as $value) {
+    $value->case_sensitive = $case_sensitive !== 'default' ? $case_sensitive : $value->case_sensitive;
     $exist = word_link_exists($value['text']);
     if (!$exist) {
       $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
@@ -298,7 +324,7 @@ function word_link_exchange_import_from_file($values, $update, &$context) {
 /**
  * Import links from taxonomy terms to DB.
  */
-function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
+function word_link_exchange_import_from_taxonomy($vid, $limit, $case_sensitive, &$context) {
   if (empty($context['sandbox'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = word_link_exchange_get_count_taxonomy_terms($vid);
@@ -313,7 +339,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, &$context) {
     if (!$exist) {
       $value = array(
         'text' => $term->name,
-        'case_sensitive' => 1,
+        'case_sensitive' => $case_sensitive !== 'default' ? $case_sensitive : 1,
         'url' => 'taxonomy/term/' . $term->tid,
         'url_title' => $term->name,
         'visibility' => 0,
