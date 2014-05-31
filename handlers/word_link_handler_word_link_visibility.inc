@@ -2,18 +2,19 @@
 
 /**
  * @file
- * Definition of word_link_handler_word_link_edit.
+ * Definition of word_link_handler_word_link_visibility.
  */
 
 /**
- * Field handler to present a link to edit a word.
+ * Field handler to present a word link visibility.
  *
  * @ingroup views_field_handlers
  */
-class word_link_handler_word_link_edit extends views_handler_field {
+class word_link_handler_word_link_visibility extends views_handler_field {
   function construct() {
     parent::construct();
-    $this->additional_fields['id'] = 'id';
+    $this->additional_fields['visibility'] = 'visibility';
+    $this->additional_fields['except'] = 'except';
   }
 
   function option_definition() {
@@ -41,16 +42,15 @@ class word_link_handler_word_link_edit extends views_handler_field {
   }
 
   function render($values) {
-    $value = $this->get_value($values, 'id');
-    return $this->render_link($this->sanitize_value($value), $values);
-  }
+    $output = NULL;
+    $visibility = $this->get_value($values, 'visibility');
+    $except = $this->get_value($values, 'except');
 
-  function render_link($data, $values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
+    if (!empty($except)) {
+      $visibility = $visibility ? t('Only on') . ': ' : t('Except') . ': ';
+      $output = $visibility . str_replace(array("\r\n", "\n", "\r"), " | ", check_plain(trim($except)));
+    }
 
-    $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = 'admin/config/content/word-link/edit/' . $data;
-
-    return $text;
+    return $output;
   }
 }

@@ -120,7 +120,16 @@ function word_link_views_data() {
     ),
   );
 
-//  $data['word_link']['visibility'] = array();
+  $data['word_link']['visibility'] = array(
+    'field' => array(
+      'title' => t('Visibility'),
+      'help' => t('Visibility of the word link.'),
+      'handler' => 'word_link_handler_word_link_visibility',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
 
   $data['word_link']['weight'] = array(
     'title' => t('Weight'),

@@ -4,3 +4,4 @@ core = 7.x
 configure = admin/config/content/formats
 files[] = handlers/word_link_handler_word_link_edit.inc
 files[] = handlers/word_link_handler_word_link_delete.inc
+files[] = handlers/word_link_handler_word_link_visibility.inc
