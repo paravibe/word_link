@@ -230,6 +230,7 @@ function _word_link_process($text, $filter) {
  *   String with converted words.
  */
 function word_link_convert_text($words, $text, $settings) {
+  global $base_url;
   // Get current path. We need this to verify
   // if word will be converted on this page.
   $current_path = current_path();
@@ -264,7 +265,8 @@ function word_link_convert_text($words, $text, $settings) {
   $path = drupal_strtolower(drupal_get_path_alias());
   $pattern = array();
   foreach ($words as $word) {
-    $url = drupal_get_path_alias($word->url);
+    $url = str_replace($base_url . '/', '', $word->url);
+    $url = drupal_get_path_alias($url);
     $match = FALSE;
 
     // Check if current path matches word except path.
