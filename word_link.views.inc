@@ -162,20 +162,11 @@ function word_link_views_data() {
     ),
   );
 
-
-  $data['word_link']['edit_link'] = array(
+  $data['word_link']['operations'] = array(
     'field' => array(
-      'title' => t('Edit link'),
-      'help' => t('Provide a simple link to edit a word.'),
-      'handler' => 'word_link_handler_word_link_edit',
-    ),
-  );
-
-  $data['word_link']['delete_link'] = array(
-    'field' => array(
-      'title' => t('Delete link'),
-      'help' => t('Provide a simple link to delete a word.'),
-      'handler' => 'word_link_handler_word_link_delete',
+      'title' => t('Operations'),
+      'help' => t('Provide an operations for editing/deleting a word.'),
+      'handler' => 'word_link_handler_word_link_operations',
     ),
   );
 

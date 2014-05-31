@@ -17,21 +17,6 @@ class word_link_handler_word_link_visibility extends views_handler_field {
     $this->additional_fields['except'] = 'except';
   }
 
-  function option_definition() {
-    $options = parent::option_definition();
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
-    return $options;
-  }
-
-  function options_form(&$form, &$form_state) {
-    $form['text'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Text to display'),
-      '#default_value' => $this->options['text'],
-    );
-    parent::options_form($form, $form_state);
-  }
-
   function access() {
     return user_access('edit word link');
   }
