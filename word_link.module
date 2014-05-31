@@ -30,24 +30,6 @@ function word_link_permission() {
 function word_link_menu() {
   $items = array();
 
-  $items['admin/config/content/word-link'] = array(
-    'title' => 'Word Link',
-    'description' => 'Administer Words Link',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('word_link_list_page_form'),
-    'access arguments' => array('view word link'),
-    'file' => 'word_link.admin.inc',
-  );
-
-  $items['admin/config/content/word-link/list'] = array(
-    'title' => 'List',
-    'description' => 'Words list',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('word_link_list_page_form'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'word_link.admin.inc',
-  );
-
   $items['admin/config/content/word-link/configuration'] = array(
     'title' => 'Configuration',
     'description' => 'Set the preferences for Word Link module.',
