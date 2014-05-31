@@ -122,6 +122,15 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function word_link_views_api() {
+  return array(
+    'api' => 3,
+  );
+}
+
+/**
  * Implements hook_init().
  */
 function word_link_init() {
