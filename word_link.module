@@ -2,8 +2,10 @@
 
 /**
  * @file
- * This module allows users to replace previously defined words to the links.
+ * ThConverts previously defined words to the links.
  */
+
+require_once 'word_link.actions.inc';
 
 /**
  * Implements hook_permission().
@@ -42,6 +44,24 @@ function word_link_entity_info() {
       'deletion callback' => 'word_link_delete',
     ),
   );
+}
+
+/**
+ * Implements hook_action_info().
+ */
+function word_link_action_info() {
+  $actions = array();
+
+  $actions['word_link_modify'] = array(
+    'type' => 'word_link',
+    'label' => t('Modify words'),
+    'behavior' => array('changes_property'),
+    'configurable' => FALSE,
+    'vbo_configurable' => TRUE,
+    'triggers' => array('any'),
+  );
+
+  return $actions;
 }
 
 /**
@@ -500,28 +520,21 @@ function word_link_exists($text, $id = 0) {
 }
 
 /**
- * Add/Update link to the database.
+ * Save word.
  *
- * @param string $action
- *   Action which need to do.
- *   Can be 'insert' or 'update'.
- * @param array $values
- *   Array with values that need to process.
- * @param int $id
- *   (optional) ID of the word.
+ * @param object $word
+ *   Word object.
  *
  * @return mixed
- *   If the record insert or update failed, returns FALSE. If it succeeded,
- *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
+ *   If save failed, returns FALSE. If it succeeded,
+ *   returns word object.
  */
-function word_link_run_action($action, $values, $id = NULL) {
-  if ($action == 'insert') {
-    return drupal_write_record('word_link', $values);
-  }
-  elseif ($action == 'update') {
-    $values['id'] = $id;
-    return drupal_write_record('word_link', $values, 'id');
-  }
+function word_link_save($word) {
+  $word = (object) $word;
+  $insert = isset($word->id) ? 'id' : array();
+  $result = drupal_write_record('word_link', $word, $insert);
+
+  return $result ? $word : $result;
 }
 
 /**

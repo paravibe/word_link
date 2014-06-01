@@ -258,8 +258,8 @@ function word_link_add_form($form, &$form_state, $id = NULL) {
     '#type' => 'radios',
     '#title' => t('Show links on specific pages'),
     '#options' => array(
-      0 => t('All pages except those listed'),
-      1 => t('Only the listed pages'),
+      t('All pages except those listed'),
+      t('Only the listed pages'),
     ),
     '#default_value' => isset($defaults->visibility) ? $defaults->visibility : 0,
   );
@@ -327,13 +327,13 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'rel' => $form_state['values']['rel'],
   );
   if (isset($form_state['values']['id'])) {
-    word_link_run_action('update', $values, $form_state['values']['id']);
+    $values['id'] = $form_state['values']['id'];
     drupal_set_message(t('Done'));
   }
   else {
-    word_link_run_action('insert', $values);
     drupal_set_message(t('Word successfully added'));
   }
+  word_link_save($values);
 
   cache_clear_all('*', 'cache_filter', TRUE);
   field_cache_clear();

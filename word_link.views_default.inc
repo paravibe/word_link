@@ -166,6 +166,13 @@ function word_link_views_default_views() {
         ),
       ),
     ),
+    'action::word_link_modify' => array(
+      'selected' => 1,
+      'postpone_processing' => 0,
+      'skip_confirmation' => 0,
+      'override_label' => 0,
+      'label' => '',
+    ),
     'action::views_bulk_operations_argument_selector_action' => array(
       'selected' => 0,
       'skip_confirmation' => 0,
@@ -266,6 +273,7 @@ function word_link_views_default_views() {
   $handler->display->display_options['filters']['case_sensitive']['id'] = 'case_sensitive';
   $handler->display->display_options['filters']['case_sensitive']['table'] = 'word_link';
   $handler->display->display_options['filters']['case_sensitive']['field'] = 'case_sensitive';
+  $handler->display->display_options['filters']['case_sensitive']['value'] = 'All';
   $handler->display->display_options['filters']['case_sensitive']['group'] = 1;
   $handler->display->display_options['filters']['case_sensitive']['exposed'] = TRUE;
   $handler->display->display_options['filters']['case_sensitive']['expose']['operator_id'] = '';

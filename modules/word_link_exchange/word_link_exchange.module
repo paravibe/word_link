@@ -299,14 +299,12 @@ function word_link_exchange_import_from_file($values, $update, $case_sensitive, 
   foreach ($values as $value) {
     $value['case_sensitive'] = $case_sensitive !== 'default' ? $case_sensitive : $value['case_sensitive'];
     $exist = word_link_exists($value['text']);
+    $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
+    word_link_save($value);
     if (!$exist) {
-      $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      word_link_run_action('insert', $value);
       $context['results']['created']++;
     }
     elseif ($exist && $update) {
-      $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
-      word_link_run_action('update', $value, $exist->id);
       $context['results']['updated']++;
     }
     $context['results']['processed']++;
@@ -345,7 +343,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, $case_sensitive, 
         'visibility' => 0,
         'except' => NULL,
       );
-      word_link_run_action('insert', $value);
+      word_link_save($value);
       $context['results']['created']++;
     }
     $context['results']['processed']++;

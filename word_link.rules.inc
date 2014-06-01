@@ -79,8 +79,8 @@ function word_link_rules_action_info() {
  */
 function word_link_visibility_list() {
   return array(
-    0 => t('All pages except those listed'),
-    1 => t('Only the listed pages'),
+    t('All pages except those listed'),
+    t('Only the listed pages'),
   );
 }
 
@@ -99,7 +99,7 @@ function word_link_action_add_word_link($text, $weight, $case_sensitive, $url, $
     'weight' => $weight,
     'rel' => $rel,
   );
-  word_link_run_action('insert', $values);
+  word_link_save($values);
 }
 
 /**
