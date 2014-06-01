@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * This module allows users to replace previously defined words to the links.
@@ -25,28 +26,29 @@ function word_link_permission() {
 }
 
 /**
+ * Implements hook_entity_info().
+ */
+function word_link_entity_info() {
+  return array(
+    'word_link' => array(
+      'label' => t('Word Link'),
+      'base table' => 'word_link',
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'id',
+        'label' => 'text',
+      ),
+      'bundles' => array(),
+      'deletion callback' => 'word_link_delete',
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function word_link_menu() {
   $items = array();
-
-  $items['admin/config/content/word-link'] = array(
-    'title' => 'Word Link',
-    'description' => 'Administer Words Link',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('word_link_list_page_form'),
-    'access arguments' => array('view word link'),
-    'file' => 'word_link.admin.inc',
-  );
-
-  $items['admin/config/content/word-link/list'] = array(
-    'title' => 'List',
-    'description' => 'Words list',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('word_link_list_page_form'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'word_link.admin.inc',
-  );
 
   $items['admin/config/content/word-link/configuration'] = array(
     'title' => 'Configuration',
@@ -119,6 +121,15 @@ function word_link_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       );
     }
   }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function word_link_views_api() {
+  return array(
+    'api' => 3,
+  );
 }
 
 /**
