@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * This module allows users to replace previously defined words to the links.
@@ -20,6 +21,25 @@ function word_link_permission() {
     ),
     'delete word link' => array(
       'title' => t('Delete Word Link'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function word_link_entity_info() {
+  return array(
+    'word_link' => array(
+      'label' => t('Word Link'),
+      'base table' => 'word_link',
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'id',
+        'label' => 'text',
+      ),
+      'bundles' => array(),
+      'deletion callback' => 'word_link_delete',
     ),
   );
 }

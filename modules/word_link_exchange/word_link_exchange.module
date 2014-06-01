@@ -158,7 +158,7 @@ function word_link_exchange_import_form() {
  */
 function word_link_exchange_import_form_validate($form, &$form_state) {
   // Preload file.
-  $file = file_save_upload('file', array('file_validate_extensions' => array('csv txt')));
+  $file = file_save_upload('file', array('file_validate_extensions' => array('csv txt')), FALSE, FILE_EXISTS_REPLACE);
 
   if (!empty($file)) {
     $file->filepath = drupal_realpath($file->uri);
