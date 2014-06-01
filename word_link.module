@@ -557,7 +557,7 @@ function word_link_delete($id) {
 /**
  * Deletes multiple words.
  *
- * @param $ids
+ * @param array $ids
  *   An array of word IDs.
  */
 function word_link_delete_multiple($ids) {

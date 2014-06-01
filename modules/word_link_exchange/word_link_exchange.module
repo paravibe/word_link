@@ -81,7 +81,6 @@ function word_link_exchange_import_form() {
     '#title' => t('Case sensitive'),
   );
 
-
   // Show import from taxonomy only when we have vocabularies.
   if (!empty($vocabularies)) {
     $vids = array();

@@ -67,7 +67,7 @@ function word_link_modify_action_form($context, &$form_state) {
       '#title' => t(
         '@title',
         array(
-          '@title' => drupal_ucfirst(str_replace('_', ' ', $property))
+          '@title' => drupal_ucfirst(str_replace('_', ' ', $property)),
         )
       ),
     );
