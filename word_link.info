@@ -4,3 +4,5 @@ core = 7.x
 configure = admin/config/content/formats
 files[] = handlers/word_link_handler_word_link_operations.inc
 files[] = handlers/word_link_handler_word_link_visibility.inc
+dependencies[] = views
+dependencies[] = views_bulk_operations
