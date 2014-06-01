@@ -52,13 +52,20 @@ function word_link_entity_info() {
 function word_link_action_info() {
   $actions = array();
 
-  $actions['word_link_modify'] = array(
+  $actions['word_link_modify_action'] = array(
     'type' => 'word_link',
     'label' => t('Modify words'),
     'behavior' => array('changes_property'),
     'configurable' => FALSE,
     'vbo_configurable' => TRUE,
     'triggers' => array('any'),
+  );
+  $actions['word_link_delete_action'] = array(
+    'type' => 'word_link',
+    'label' => t('Delete words'),
+    'behavior' => array('changes_property'),
+    'configurable' => FALSE,
+    'vbo_configurable' => FALSE,
   );
 
   return $actions;
@@ -538,13 +545,23 @@ function word_link_save($word) {
 }
 
 /**
- * Delete link from the database.
+ * Delete word.
  *
  * @param int $id
  *   ID of the word.
  */
 function word_link_delete($id) {
-  db_delete('word_link')->condition('id', $id)->execute();
+  word_link_delete_multiple(array($id));
+}
+
+/**
+ * Deletes multiple words.
+ *
+ * @param $ids
+ *   An array of word IDs.
+ */
+function word_link_delete_multiple($ids) {
+  db_delete('word_link')->condition('id', $ids, 'IN')->execute();
 }
 
 /**

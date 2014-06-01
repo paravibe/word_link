@@ -11,13 +11,30 @@
  * Goes through values and uses them to modify the passed words by
  * replacing the existing values.
  */
-function word_link_modify($word, $context) {
+function word_link_modify_action($word, $context) {
   $modify = array_filter($context['modify']);
   foreach ($modify as $name => $value) {
     $value = $context['properties'][$name];
     $word->$name = $value;
   }
   word_link_save($word);
+  if ($context['progress']['current'] == $context['progress']['total']) {
+    cache_clear_all('*', 'cache_filter', TRUE);
+    field_cache_clear();
+  }
+}
+
+/**
+ * Action function.
+ *
+ * Delete words.
+ */
+function word_link_delete_action($word, $context) {
+  word_link_delete($word->id);
+  if ($context['progress']['current'] == $context['progress']['total']) {
+    cache_clear_all('*', 'cache_filter', TRUE);
+    field_cache_clear();
+  }
 }
 
 /**
@@ -25,7 +42,7 @@ function word_link_modify($word, $context) {
  *
  * Displays form elements for properties of word.
  */
-function word_link_modify_form($context, &$form_state) {
+function word_link_modify_action_form($context, &$form_state) {
   $properties = array(
     'weight',
     'case_sensitive',
@@ -162,7 +179,7 @@ function word_link_modify_form($context, &$form_state) {
  *
  * Passes values to word_link_modify().
  */
-function word_link_modify_submit($form, $form_state) {
+function word_link_modify_action_submit($form, $form_state) {
   return array(
     'modify' => $form_state['values']['modify'],
     'properties' => $form_state['values']['properties'],
