@@ -267,6 +267,12 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     '#description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
     '#default_value' => isset($word->except) ? $word->except : '',
   );
+  $form['word_link_add_form']['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#description' => t('If unchecked this word will not be converted.'),
+    '#default_value' => isset($word->status) ? (int) $word->status : 1,
+  );
   $form['word_link_add_form']['id'] = array(
     '#type' => 'hidden',
     '#value' => isset($word->id) ? $word->id : NULL,
@@ -323,7 +329,8 @@ function word_link_add_form_save_submit($form, &$form_state) {
     'visibility' => $form_state['values']['visibility'],
     'except' => trim($form_state['values']['except']),
     'weight' => $form_state['values']['weight'],
-    'rel' => $form_state['values']['rel'],
+    'rel' => trim($form_state['values']['rel']),
+    'status' => $form_state['values']['status'],
   );
 
   $action = 'created';

@@ -424,16 +424,22 @@ function word_link_get_node_types() {
 /**
  * Loads words from the database.
  *
+ * @param bool $enabled
+ *   If TRUE load only enabled words.
+ *
  * @return array
  *   An array of words objects indexed by text.
  */
-function word_link_load_all() {
+function word_link_load_all($enabled = TRUE) {
   $words = &drupal_static(__FUNCTION__);
 
   if (!isset($words)) {
     $query = db_select('word_link', 'wl');
     $query->addExpression('LOWER(wl.text)', 'text_lower');
     $query->fields('wl');
+    if ($enabled) {
+      $query->condition('status', 1);
+    }
     $query->orderBy('wl.weight');
     $results = $query->execute();
 

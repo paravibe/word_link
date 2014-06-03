@@ -162,6 +162,26 @@ function word_link_views_data() {
     ),
   );
 
+  $data['word_link']['status'] = array(
+    'title' => t('Status'),
+    'help' => t('Whether or not the word is enabled.'),
+    'field' => array(
+      'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
+      'output formats' => array(
+        'enabled-disabled' => array(t('Enabled'), t('Disabled')),
+      ),
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Status'),
+      'type' => 'enabled-disabled',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   $data['word_link']['operations'] = array(
     'field' => array(
       'title' => t('Operations'),

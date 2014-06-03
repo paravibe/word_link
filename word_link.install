@@ -90,6 +90,12 @@ function word_link_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+        'size' => 'tiny',
+      ),
     ),
     'primary key' => array('id'),
   );
@@ -133,6 +139,22 @@ function word_link_update_7002() {
         'length' => 30,
         'not null' => TRUE,
         'default' => '',
+      )
+    );
+  }
+}
+
+/**
+ * Adding a status column.
+ */
+function word_link_update_7003() {
+  if (!db_field_exists('word_link', 'status')) {
+    db_add_field('word_link', 'status',
+      array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+        'size' => 'tiny',
       )
     );
   }

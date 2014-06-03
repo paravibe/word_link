@@ -506,7 +506,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
   );
 
   // Get all words from DB.
-  $words = word_link_load_all();
+  $words = word_link_load_all(FALSE);
   // Get right delimiter.
   switch ($form_state['values']['delimiter']) {
     case 'comma':
