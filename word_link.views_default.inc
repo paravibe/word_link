@@ -22,7 +22,6 @@ function word_link_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Word Link list';
-  $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'view word link';
@@ -34,6 +33,7 @@ function word_link_views_default_views() {
   $handler->display->display_options['pager']['options']['items_per_page'] = '25';
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
+    'views_bulk_operations' => 'views_bulk_operations',
     'id' => 'id',
     'weight' => 'weight',
     'text' => 'text',
@@ -42,11 +42,17 @@ function word_link_views_default_views() {
     'url_title' => 'url_title',
     'class' => 'class',
     'rel' => 'rel',
+    'status' => 'status',
     'visibility' => 'visibility',
     'operations' => 'operations',
   );
   $handler->display->display_options['style_options']['default'] = 'id';
   $handler->display->display_options['style_options']['info'] = array(
+    'views_bulk_operations' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
     'id' => array(
       'sortable' => 1,
       'default_sort_order' => 'desc',
@@ -97,6 +103,13 @@ function word_link_views_default_views() {
       'empty_column' => 0,
     ),
     'rel' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'status' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -235,6 +248,12 @@ function word_link_views_default_views() {
   $handler->display->display_options['fields']['rel']['table'] = 'word_link';
   $handler->display->display_options['fields']['rel']['field'] = 'rel';
   $handler->display->display_options['fields']['rel']['label'] = 'Rel';
+  /* Field: Word Link: Status */
+  $handler->display->display_options['fields']['status']['id'] = 'status';
+  $handler->display->display_options['fields']['status']['table'] = 'word_link';
+  $handler->display->display_options['fields']['status']['field'] = 'status';
+  $handler->display->display_options['fields']['status']['type'] = 'enabled-disabled';
+  $handler->display->display_options['fields']['status']['not'] = 0;
   /* Field: Word Link: Visibility */
   $handler->display->display_options['fields']['visibility']['id'] = 'visibility';
   $handler->display->display_options['fields']['visibility']['table'] = 'word_link';
@@ -272,6 +291,23 @@ function word_link_views_default_views() {
   $handler->display->display_options['filters']['text']['expose']['identifier'] = 'text';
   $handler->display->display_options['filters']['text']['expose']['remember'] = TRUE;
   $handler->display->display_options['filters']['text']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+  );
+  /* Filter criterion: Word Link: Status */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'word_link';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 'All';
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['status']['expose']['operator_id'] = '';
+  $handler->display->display_options['filters']['status']['expose']['label'] = 'Status';
+  $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
+  $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
+  $handler->display->display_options['filters']['status']['expose']['remember'] = TRUE;
+  $handler->display->display_options['filters']['status']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     3 => 0,

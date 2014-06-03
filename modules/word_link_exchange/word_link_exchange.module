@@ -201,7 +201,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
       if (!isset($messages['delimiter_custom'])) {
         foreach ($content as $row) {
           $row = str_getcsv($row, $delimiter);
-          if (count($row) == 9) {
+          if (count($row) == 10) {
             $values[] = $value = array(
               'text' => $row[0],
               'case_sensitive' => $row[1],
@@ -211,7 +211,8 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
               'visibility' => $row[5],
               'weight' => $row[6],
               'rel' => $row[7],
-              'except' => $row[8],
+              'status' => $row[8],
+              'except' => $row[9],
             );
           }
           else {
@@ -502,6 +503,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
     'visibility',
     'weight',
     'rel',
+    'status',
     'except',
   );
 
