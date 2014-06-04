@@ -18,7 +18,7 @@ function word_link_modify_action($word, $context) {
     $word->$name = $value;
   }
   word_link_save($word);
-  if ($context['progress']['current'] == $context['progress']['total']) {
+  if ($context['progress']['current'] >= $context['progress']['total']) {
     cache_clear_all('*', 'cache_filter', TRUE);
     field_cache_clear();
   }
@@ -31,7 +31,7 @@ function word_link_modify_action($word, $context) {
  */
 function word_link_delete_action($word, $context) {
   word_link_delete($word->id);
-  if ($context['progress']['current'] == $context['progress']['total']) {
+  if ($context['progress']['current'] >= $context['progress']['total']) {
     cache_clear_all('*', 'cache_filter', TRUE);
     field_cache_clear();
   }
@@ -184,4 +184,21 @@ function word_link_modify_action_submit($form, $form_state) {
     'modify' => $form_state['values']['modify'],
     'properties' => $form_state['values']['properties'],
   );
+}
+
+/**
+ * Action function.
+ *
+ * Checks if word URL is valid and if not change word status to disabled.
+ *
+ */
+function word_link_disable_invalid_word_action($word, &$context) {
+  if (!drupal_valid_path(drupal_get_normal_path($word->url))) {
+    $word->status = FALSE;
+    word_link_save($word);
+  }
+  if ($context['progress']['current'] >= $context['progress']['total']) {
+    cache_clear_all('*', 'cache_filter', TRUE);
+    field_cache_clear();
+  }
 }

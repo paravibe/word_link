@@ -67,6 +67,13 @@ function word_link_action_info() {
     'configurable' => FALSE,
     'vbo_configurable' => FALSE,
   );
+  $actions['word_link_disable_invalid_word_action'] = array(
+    'type' => 'word_link',
+    'label' => t('Disable words with invalid URLs'),
+    'behavior' => array('changes_property'),
+    'configurable' => FALSE,
+    'vbo_configurable' => FALSE,
+  );
 
   return $actions;
 }
