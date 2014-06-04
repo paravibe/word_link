@@ -11,7 +11,7 @@
 function word_link_views_default_views() {
   $view = new view();
   $view->name = 'word_link_list';
-  $view->description = '';
+  $view->description = 'List of Word Link words';
   $view->tag = 'default';
   $view->base_table = 'word_link';
   $view->human_name = 'Word Link list';
@@ -31,6 +31,9 @@ function word_link_views_default_views() {
   $handler->display->display_options['exposed_form']['options']['reset_button'] = TRUE;
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '25';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'views_bulk_operations' => 'views_bulk_operations',
@@ -166,6 +169,13 @@ function word_link_views_default_views() {
       'override_label' => 0,
       'label' => '',
     ),
+    'action::word_link_disable_invalid_word_action' => array(
+      'selected' => 1,
+      'postpone_processing' => 0,
+      'skip_confirmation' => 0,
+      'override_label' => 0,
+      'label' => '',
+    ),
     'action::views_bulk_operations_script_action' => array(
       'selected' => 0,
       'postpone_processing' => 0,
@@ -225,7 +235,7 @@ function word_link_views_default_views() {
   $handler->display->display_options['fields']['text']['id'] = 'text';
   $handler->display->display_options['fields']['text']['table'] = 'word_link';
   $handler->display->display_options['fields']['text']['field'] = 'text';
-  /* Field: Word Link: Case sensitivity */
+  /* Field: Word Link: Case sensitive */
   $handler->display->display_options['fields']['case_sensitive']['id'] = 'case_sensitive';
   $handler->display->display_options['fields']['case_sensitive']['table'] = 'word_link';
   $handler->display->display_options['fields']['case_sensitive']['field'] = 'case_sensitive';
@@ -262,22 +272,6 @@ function word_link_views_default_views() {
   $handler->display->display_options['fields']['operations']['id'] = 'operations';
   $handler->display->display_options['fields']['operations']['table'] = 'word_link';
   $handler->display->display_options['fields']['operations']['field'] = 'operations';
-  /* Filter criterion: Word Link: Word ID */
-  $handler->display->display_options['filters']['id']['id'] = 'id';
-  $handler->display->display_options['filters']['id']['table'] = 'word_link';
-  $handler->display->display_options['filters']['id']['field'] = 'id';
-  $handler->display->display_options['filters']['id']['group'] = 1;
-  $handler->display->display_options['filters']['id']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['id']['expose']['operator_id'] = 'id_op';
-  $handler->display->display_options['filters']['id']['expose']['label'] = 'Word ID';
-  $handler->display->display_options['filters']['id']['expose']['operator'] = 'id_op';
-  $handler->display->display_options['filters']['id']['expose']['identifier'] = 'id';
-  $handler->display->display_options['filters']['id']['expose']['remember'] = TRUE;
-  $handler->display->display_options['filters']['id']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-  );
   /* Filter criterion: Word Link: Word */
   $handler->display->display_options['filters']['text']['id'] = 'text';
   $handler->display->display_options['filters']['text']['table'] = 'word_link';
@@ -289,42 +283,7 @@ function word_link_views_default_views() {
   $handler->display->display_options['filters']['text']['expose']['label'] = 'Word';
   $handler->display->display_options['filters']['text']['expose']['operator'] = 'text_op';
   $handler->display->display_options['filters']['text']['expose']['identifier'] = 'text';
-  $handler->display->display_options['filters']['text']['expose']['remember'] = TRUE;
   $handler->display->display_options['filters']['text']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-  );
-  /* Filter criterion: Word Link: Status */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'word_link';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value'] = 'All';
-  $handler->display->display_options['filters']['status']['group'] = 1;
-  $handler->display->display_options['filters']['status']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['status']['expose']['operator_id'] = '';
-  $handler->display->display_options['filters']['status']['expose']['label'] = 'Status';
-  $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
-  $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
-  $handler->display->display_options['filters']['status']['expose']['remember'] = TRUE;
-  $handler->display->display_options['filters']['status']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-  );
-  /* Filter criterion: Word Link: Case sensitivity */
-  $handler->display->display_options['filters']['case_sensitive']['id'] = 'case_sensitive';
-  $handler->display->display_options['filters']['case_sensitive']['table'] = 'word_link';
-  $handler->display->display_options['filters']['case_sensitive']['field'] = 'case_sensitive';
-  $handler->display->display_options['filters']['case_sensitive']['value'] = 'All';
-  $handler->display->display_options['filters']['case_sensitive']['group'] = 1;
-  $handler->display->display_options['filters']['case_sensitive']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['case_sensitive']['expose']['operator_id'] = '';
-  $handler->display->display_options['filters']['case_sensitive']['expose']['label'] = 'Case sensitive';
-  $handler->display->display_options['filters']['case_sensitive']['expose']['operator'] = 'case_sensitive_op';
-  $handler->display->display_options['filters']['case_sensitive']['expose']['identifier'] = 'case_sensitive';
-  $handler->display->display_options['filters']['case_sensitive']['expose']['remember'] = TRUE;
-  $handler->display->display_options['filters']['case_sensitive']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     3 => 0,
@@ -340,8 +299,39 @@ function word_link_views_default_views() {
   $handler->display->display_options['filters']['url']['expose']['label'] = 'URL';
   $handler->display->display_options['filters']['url']['expose']['operator'] = 'url_op';
   $handler->display->display_options['filters']['url']['expose']['identifier'] = 'url';
-  $handler->display->display_options['filters']['url']['expose']['remember'] = TRUE;
   $handler->display->display_options['filters']['url']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+  );
+  /* Filter criterion: Word Link: Status */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'word_link';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 'All';
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['status']['expose']['operator_id'] = '';
+  $handler->display->display_options['filters']['status']['expose']['label'] = 'Status';
+  $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
+  $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
+  $handler->display->display_options['filters']['status']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+  );
+  /* Filter criterion: Word Link: Case sensitive */
+  $handler->display->display_options['filters']['case_sensitive']['id'] = 'case_sensitive';
+  $handler->display->display_options['filters']['case_sensitive']['table'] = 'word_link';
+  $handler->display->display_options['filters']['case_sensitive']['field'] = 'case_sensitive';
+  $handler->display->display_options['filters']['case_sensitive']['value'] = 'All';
+  $handler->display->display_options['filters']['case_sensitive']['group'] = 1;
+  $handler->display->display_options['filters']['case_sensitive']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['case_sensitive']['expose']['operator_id'] = '';
+  $handler->display->display_options['filters']['case_sensitive']['expose']['label'] = 'Case sensitive';
+  $handler->display->display_options['filters']['case_sensitive']['expose']['operator'] = 'case_sensitive_op';
+  $handler->display->display_options['filters']['case_sensitive']['expose']['identifier'] = 'case_sensitive';
+  $handler->display->display_options['filters']['case_sensitive']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     3 => 0,
