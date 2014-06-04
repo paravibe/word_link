@@ -54,7 +54,7 @@ function word_link_views_data() {
   );
 
   $data['word_link']['case_sensitive'] = array(
-    'title' => t('Case sensitivity'),
+    'title' => t('Case sensitive'),
     'help' => t('Case sensitivity of the word link.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',

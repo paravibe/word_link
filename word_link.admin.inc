@@ -215,8 +215,8 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
   );
   $form['word_link_add_form']['case_sensitive'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Case Sensitivity'),
-    '#description' => t('By default Word Link are case sensitive. Uncheck this checkbox if you want this particular Word Link to be case insensitive.'),
+    '#title' => t('Case Sensitive'),
+    '#description' => t('By default Word Link are case sensitive. Uncheck the checkbox if you want this particular Word Link to be case insensitive.'),
     '#default_value' => isset($word->case_sensitive) ? (int) $word->case_sensitive : 1,
   );
   $form['word_link_add_form']['url'] = array(
