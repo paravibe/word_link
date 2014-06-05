@@ -37,17 +37,19 @@ class WordLinkWebTestCase extends DrupalWebTestCase {
    */
   public function testWordLinkCreate() {
     // Create word to edit.
-    $edit = array();
-    $edit['text'] = $this->randomName(8);
-    $edit['weight'] = 0;
-    $edit['url'] = 'http://drupal.org';
-    $edit['class'] = $this->randomName(8);
+    $edit = array(
+      'word[text]' => $this->randomName(8),
+      'word[weight]' => 0,
+      'word[url]' => 'http://drupal.org',
+      'word[class]' => $this->randomName(8),
+    );
+
     $this->drupalPost('admin/config/content/word-link/add', $edit, t('Save'));
     $this->assertRaw(
       t(
         'Word %text has been @action.',
         array(
-          '%text' => $edit['text'],
+          '%text' => $edit['word[text]'],
           '@action' => 'created',
         )
       )
@@ -58,7 +60,11 @@ class WordLinkWebTestCase extends DrupalWebTestCase {
     unset($word['text_lower']);
     $word['text'] = $this->randomName(8);
 
-    $this->drupalPost('admin/config/content/word-link/edit/' . $word['id'], $word, t('Save'));
+    foreach ($word as $delta => $value) {
+      $edit['word[' . $delta . ']'] = $value;
+    }
+
+    $this->drupalPost('admin/config/content/word-link/edit/' . $word['id'], $edit, t('Save'));
     $this->assertRaw(
       t(
         'Word %text has been @action.',

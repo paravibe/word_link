@@ -549,7 +549,7 @@ function word_link_exists($text, $id = 0) {
  *   If save failed, returns FALSE. If it succeeded,
  *   returns word object.
  */
-function word_link_save($word) {
+function word_link_save(&$word) {
   $word = (object) $word;
   $insert = isset($word->id) ? 'id' : array();
   $result = drupal_write_record('word_link', $word, $insert);
