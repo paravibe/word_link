@@ -52,6 +52,7 @@ function word_link_modify_action_form($context, &$form_state) {
     'rel',
     'visibility',
     'except',
+    'status',
   );
 
   $form['#tree'] = TRUE;
@@ -167,6 +168,17 @@ function word_link_modify_action_form($context, &$form_state) {
     '#states' => array(
       'invisible' => array(
         ':input[name="modify[except]"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['properties']['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#description' => t('If unchecked this word will not be converted.'),
+    '#default_value' => 1,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="modify[status]"]' => array('checked' => FALSE),
       ),
     ),
   );
