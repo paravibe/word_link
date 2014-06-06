@@ -288,7 +288,7 @@ function word_link_convert_text($words, $text, $settings) {
     $nodes = word_link_get_node_types();
     $type = isset($nodes[$args[1]]) ? $nodes[$args[1]]->type : NULL;
 
-    if (in_array($type, $settings['word_link_content_types']) && !$settings['word_link_content_types'][$type]) {
+    if (empty($settings['word_link_content_types'][$type])) {
       return $text;
     }
   }
