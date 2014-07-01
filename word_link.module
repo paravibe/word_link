@@ -364,8 +364,27 @@ function word_link_convert_text($words, $text, $settings) {
           $link = $dom->createDocumentFragment();
 
           $target = url_is_external($words[$text_lower]->url) ? '_blank' : '';
+
+          $url_external = url_is_external($words[$text_lower]->url);
+          $url_options = array();
+          if ($url_external) {
+            $url_path = $words[$text_lower]->url;
+          }
+          else {
+            $url_parts = parse_url($words[$text_lower]->url);
+            $url_query = array();
+            if (isset($url_parts['query'])) {
+              parse_str($url_parts['query'], $url_query);
+            }
+            $url_options = array(
+              'query' => $url_query,
+              'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : '',
+            );
+            $url_path = $url_parts['path'];
+          }
+
           $attributes = array(
-            'href' => url($words[$text_lower]->url),
+            'href' => url($url_path, $url_options),
             'title' => $words[$text_lower]->url_title,
             'class' => $words[$text_lower]->class,
             'target' => $target,
