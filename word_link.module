@@ -330,13 +330,28 @@ function word_link_convert_text($words, $text, $settings) {
       $pattern[] = preg_replace('/ /', '\\s+', preg_quote($text_lower, '/'));
     }
   }
-  if ($settings['word_link_boundary']) {
-    $pattern  = '/(?<=)(' . implode('|', $pattern) . ')/ui';
-  }
-  else {
-    $pattern = '/((\b)|(?<=))(' . implode('|', $pattern) . ')\b/ui';
+
+  // Chunk pattern string to avoid preg_match_all() limits.
+  $patterns = array_chunk($pattern, 1000, TRUE);
+
+  foreach ($patterns as $pattern) {
+    if ($settings['word_link_boundary']) {
+      $pattern = '/(?<=)(' . implode('|', $pattern) . ')/ui';
+    }
+    else {
+      $pattern = '/((\b)|(?<=))(' . implode('|', $pattern) . ')\b/ui';
+    }
+
+    word_link_convert_text_recursively($text, $pattern, $words, $disallowed, $settings, $tag);
   }
 
+  return $text;
+}
+
+/**
+ * Helper function for converting text.
+ */
+function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowed, $settings, $tag) {
   // Create DOM object.
   $dom = filter_dom_load($text);
   $xpath = new DOMXPath($dom);
@@ -425,7 +440,7 @@ function word_link_convert_text($words, $text, $settings) {
     }
   }
 
-  return filter_dom_serialize($dom);
+  $text = filter_dom_serialize($dom);
 }
 
 /**
