@@ -212,7 +212,7 @@ function word_link_exchange_import_form_validate($form, &$form_state) {
               'weight' => $row[6],
               'rel' => $row[7],
               'status' => $row[8],
-              'except' => $row[9],
+              'except_list' => $row[9],
             );
           }
           else {
@@ -299,7 +299,7 @@ function word_link_exchange_import_from_file($values, $update, $case_sensitive, 
   foreach ($values as $value) {
     $value['case_sensitive'] = $case_sensitive !== 'default' ? $case_sensitive : $value['case_sensitive'];
     $exist = word_link_exists($value['text']);
-    $value['except'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
+    $value['except_list'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
     word_link_save($value);
     if (!$exist) {
       $context['results']['created']++;
@@ -341,7 +341,7 @@ function word_link_exchange_import_from_taxonomy($vid, $limit, $case_sensitive, 
         'url' => 'taxonomy/term/' . $term->tid,
         'url_title' => $term->name,
         'visibility' => 0,
-        'except' => NULL,
+        'except_list' => NULL,
       );
       word_link_save($value);
       $context['results']['created']++;
@@ -504,7 +504,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
     'weight',
     'rel',
     'status',
-    'except',
+    'except_list',
   );
 
   // Get all words from DB.
@@ -575,7 +575,7 @@ function word_link_exchange_export_form_submit($form, &$form_state) {
   foreach ($words as $word) {
     $string = '';
     foreach ($values as $value) {
-      if ($value != 'except') {
+      if ($value != 'except_list') {
         $string .= $word->$value;
         $string .= $delimiter;
       }

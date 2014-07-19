@@ -315,15 +315,15 @@ function word_link_convert_text($words, $text, $settings) {
     $match = FALSE;
 
     // Check if current path matches word except path.
-    if (!empty($word->except)) {
-      $match = drupal_match_path($path, $word->except);
+    if (!empty($word->except_list)) {
+      $match = drupal_match_path($path, $word->except_list);
       if ($path != $current_path) {
-        $match = $match || drupal_match_path($current_path, $word->except);
+        $match = $match || drupal_match_path($current_path, $word->except_list);
       }
     }
 
     // Get visibility status and check if need to convert word on this page.
-    $visibility = empty($word->except) || !isset($word->visibility) ? FALSE : $word->visibility;
+    $visibility = empty($word->except_list) || !isset($word->visibility) ? FALSE : $word->visibility;
 
     if ($url != $path && !$match && !$visibility || $url != $path && $visibility && $match) {
       $text_lower = preg_replace('/\s+/', ' ', trim($word->text_lower));

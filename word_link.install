@@ -73,7 +73,7 @@ function word_link_schema() {
         'default' => 0,
         'size' => 'tiny',
       ),
-      'except' => array(
+      'except_list' => array(
         'type' => 'text',
         'length' => 255,
         'not null' => TRUE,
@@ -157,5 +157,19 @@ function word_link_update_7003() {
         'size' => 'tiny',
       )
     );
+  }
+}
+
+/**
+ * Rename 'except' field to 'except_list'.
+ */
+function word_link_update_7004() {
+  if (!db_field_exists('word_link', 'except_list')) {
+    $spec = array(
+      'type' => 'text',
+      'length' => 255,
+      'not null' => TRUE,
+    );
+    db_change_field('word_link', 'except', 'except_list', $spec);
   }
 }

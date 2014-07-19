@@ -51,7 +51,7 @@ function word_link_modify_action_form($context, &$form_state) {
     'class',
     'rel',
     'visibility',
-    'except',
+    'except_list',
     'status',
   );
 
@@ -162,12 +162,12 @@ function word_link_modify_action_form($context, &$form_state) {
       ),
     ),
   );
-  $form['properties']['except'] = array(
+  $form['properties']['except_list'] = array(
     '#type' => 'textarea',
     '#description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
     '#states' => array(
       'invisible' => array(
-        ':input[name="modify[except]"]' => array('checked' => FALSE),
+        ':input[name="modify[except_list]"]' => array('checked' => FALSE),
       ),
     ),
   );

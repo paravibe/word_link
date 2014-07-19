@@ -98,10 +98,10 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     ),
     '#default_value' => isset($word->visibility) ? $word->visibility : 0,
   );
-  $form['word']['except'] = array(
+  $form['word']['except_list'] = array(
     '#type' => 'textarea',
     '#description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
-    '#default_value' => isset($word->except) ? $word->except : '',
+    '#default_value' => isset($word->except_list) ? $word->except_list : '',
   );
   $form['word']['status'] = array(
     '#type' => 'checkbox',

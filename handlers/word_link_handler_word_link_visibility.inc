@@ -14,7 +14,7 @@ class word_link_handler_word_link_visibility extends views_handler_field {
   function construct() {
     parent::construct();
     $this->additional_fields['visibility'] = 'visibility';
-    $this->additional_fields['except'] = 'except';
+    $this->additional_fields['except_list'] = 'except_list';
   }
 
   function access() {
@@ -29,7 +29,7 @@ class word_link_handler_word_link_visibility extends views_handler_field {
   function render($values) {
     $output = NULL;
     $visibility = $this->get_value($values, 'visibility');
-    $except = $this->get_value($values, 'except');
+    $except = $this->get_value($values, 'except_list');
 
     if (!empty($except)) {
       $visibility = $visibility ? t('Only on') . ': ' : t('Except') . ': ';

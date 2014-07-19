@@ -61,7 +61,7 @@ function word_link_rules_action_info() {
           'options list' => 'word_link_visibility_list',
           'default value' => 0,
         ),
-        'except' => array(
+        'except_list' => array(
           'type' => 'text',
           'label' => t('Pages'),
           'description' => t('Specify pages by using their paths. Enter one path per line. E.g. node/1.'),
@@ -95,7 +95,7 @@ function word_link_action_add_word_link($text, $weight, $case_sensitive, $url, $
     'url_title' => trim($url_label),
     'class' => trim($class),
     'visibility' => $visibility,
-    'except' => trim($except),
+    'except_list' => trim($except),
     'weight' => $weight,
     'rel' => $rel,
   );
