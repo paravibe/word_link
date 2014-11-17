@@ -142,10 +142,10 @@ function word_link_add_form_validate($form, &$form_state) {
   if ($form_state['values']['op'] == t('Save')) {
     $normal_path = drupal_get_normal_path($values['url']);
     if (!drupal_valid_path($normal_path)) {
-      form_set_error('url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $values['url'])));
+      form_set_error('word][url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $values['url'])));
     }
     if (!empty($values['class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($values['class']))) {
-      form_set_error('class', t('Class is not valid.'));
+      form_set_error('word][class', t('Class is not valid.'));
     }
   }
 }
