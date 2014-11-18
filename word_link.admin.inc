@@ -147,6 +147,9 @@ function word_link_add_form_validate($form, &$form_state) {
     if (!empty($values['class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($values['class']))) {
       form_set_error('word][class', t('Class is not valid.'));
     }
+    if ($values['text'] != trim($values['text'])) {
+      form_set_error('word][text', t('Invalid value given in Word/Phrase field. Check whitespaces in the beginning and end of the string.'));
+    }
   }
 }
 
