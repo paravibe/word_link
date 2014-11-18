@@ -24,6 +24,10 @@ function word_link_install() {
  */
 function word_link_uninstall() {
   variable_del('word_link_add_css');
+  variable_del('word_link_defaults_class');
+  variable_del('word_link_defaults_rel');
+  variable_del('word_link_defaults_case_sensitive');
+  variable_del('word_link_defaults_status');
 }
 
 /**

@@ -15,6 +15,43 @@ function word_link_admin_settings() {
     '#description' => t('If turned on default CSS from module will be added.'),
     '#default_value' => variable_get('word_link_add_css', 1),
   );
+  
+    // Default settings for add word form
+  $form['defaults'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Default values'),
+    '#description' => t('These values will be set to default when adding a word.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['defaults']['word_link_defaults_class'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Class'),
+    '#size' => 30,
+    '#maxlength' => 255,
+    '#description' => t('Use this to set the default class(es) for links.'),
+    '#default_value' => variable_get('word_link_defaults_class', 'word-link'),
+  );
+  $form['defaults']['word_link_defaults_rel'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Relationship'),
+    '#size' => 30,
+    '#maxlength' => 30,
+    '#description' => t('Use this to set a default rel attribute to links.'),
+    '#default_value' => variable_get('word_link_defaults_rel', ''),
+  );
+  $form['defaults']['word_link_defaults_case_sensitive'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Case Sensitive'),
+    '#description' => t('Uncheck the checkbox if you want Word Link to be case insensitive by default.'),
+    '#default_value' => variable_get('word_link_defaults_case_sensitive', 1),
+  );
+  $form['defaults']['word_link_defaults_status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#description' => t('Sets the default status when creating a word.'),
+    '#default_value' => variable_get('word_link_defaults_status', 1),
+  );
 
   return system_settings_form($form);
 }
@@ -53,7 +90,7 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     '#type' => 'checkbox',
     '#title' => t('Case Sensitive'),
     '#description' => t('By default Word Link are case sensitive. Uncheck the checkbox if you want this particular Word Link to be case insensitive.'),
-    '#default_value' => isset($word->case_sensitive) ? (int) $word->case_sensitive : 1,
+    '#default_value' => isset($word->case_sensitive) ? (int) $word->case_sensitive : variable_get('word_link_defaults_case_sensitive', 1),
   );
   $form['word']['url'] = array(
     '#type' => 'textfield',
@@ -79,7 +116,7 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     '#size' => 30,
     '#maxlength' => 255,
     '#description' => t('Use this to add a class for the link. Default value is "word-link".'),
-    '#default_value' => isset($word->class) ? $word->class : 'word-link',
+    '#default_value' => isset($word->class) ? $word->class : variable_get('word_link_defaults_class', 'word-link'),
   );
   $form['word']['rel'] = array(
     '#type' => 'textfield',
@@ -87,7 +124,7 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     '#size' => 30,
     '#maxlength' => 30,
     '#description' => t('Use this to add a rel attribute to the link.'),
-    '#default_value' => isset($word->rel) ? $word->rel : '',
+    '#default_value' => isset($word->rel) ? $word->rel : variable_get('word_link_defaults_rel', ''),
   );
   $form['word']['visibility'] = array(
     '#type' => 'radios',
@@ -107,7 +144,7 @@ function word_link_add_form($form, &$form_state, $word = NULL) {
     '#type' => 'checkbox',
     '#title' => t('Enabled'),
     '#description' => t('If unchecked this word will not be converted.'),
-    '#default_value' => isset($word->status) ? (int) $word->status : 1,
+    '#default_value' => isset($word->status) ? (int) $word->status : variable_get('word_link_defaults_status', 1),
   );
   $form['word']['id'] = array(
     '#type' => 'hidden',
