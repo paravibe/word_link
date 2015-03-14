@@ -253,10 +253,7 @@ function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
  * Helper function for filter process.
  */
 function _word_link_process($text, $filter) {
-  $words = word_link_load_all();
-  if (!empty($words)) {
-    $text = word_link_convert_text($words, $text, $filter->settings);
-  }
+  $text = word_link_convert_text($text, $filter->settings);
 
   return $text;
 }
@@ -264,8 +261,6 @@ function _word_link_process($text, $filter) {
 /**
  * Find and convert defined word to link.
  *
- * @param array $words
- *   Array of words indexed by text.
  * @param string $text
  *   Input text.
  * @param array $settings
@@ -274,7 +269,7 @@ function _word_link_process($text, $filter) {
  * @return string
  *   String with converted words.
  */
-function word_link_convert_text($words, $text, $settings) {
+function word_link_convert_text($text, $settings) {
   global $base_url;
   // Get current path. We need this to verify
   // if word will be converted on this page.
@@ -291,6 +286,14 @@ function word_link_convert_text($words, $text, $settings) {
     if (empty($settings['word_link_content_types'][$type])) {
       return $text;
     }
+  }
+
+  // Get array of words.
+  $words = word_link_load_all();
+
+  // Exit if there are no words to replace.
+  if (empty($words)) {
+    return $text;
   }
 
   // Default HTML tag used in theme.
