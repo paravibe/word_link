@@ -354,6 +354,19 @@ function word_link_convert_text($text, $settings) {
 
 /**
  * Helper function for converting text.
+ *
+ * @param string $text
+ *   Input text.
+ * @param string $pattern
+ *   Regular expression pattern.
+ * @param array $words
+ *   Array of all words.
+ * @param string $disallowed
+ *   Disallowed tags.
+ * @param array $settings
+ *   Array of filter settings.
+ * @param $tag
+ *   Tag that will be used to replace word.
  */
 function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowed, $settings, $tag) {
   // Create DOM object.
@@ -398,8 +411,14 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
             $url_options = array(
               'query' => $url_query,
               'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : '',
+              'external' => TRUE,
             );
-            $url_path = $url_parts['path'];
+
+            if (empty($url_parts['path'])) {
+              // Assuming that URL starts with #.
+              $url_options['external'] = TRUE;
+              $url_path = NULL;
+            }
           }
 
           $attributes = array(
@@ -683,4 +702,43 @@ function word_link_urls_autocomplete_callback($string = "") {
   }
 
   drupal_json_output($matches);
+}
+
+/**
+ * Checks a path exists and the current user has access to it.
+ *
+ * @param $path
+ *   The path to check.
+ * @param $dynamic_allowed
+ *   Whether paths with menu wildcards (like user/%) should be allowed.
+ *
+ * @return bool
+ *   TRUE if it is a valid path AND the current user has access permission,
+ *   FALSE otherwise.
+ */
+function word_link_valid_path($path, $dynamic_allowed = FALSE) {
+  global $menu_admin;
+  // We indicate that a menu administrator is running the menu access check.
+  $menu_admin = TRUE;
+  if ($path == '<front>' || url_is_external($path)) {
+    $item = array('access' => TRUE);
+  }
+  elseif ($dynamic_allowed && preg_match('/\/\%/', $path)) {
+    // Path is dynamic (ie 'user/%'), so check directly against menu_router table.
+    if ($item = db_query("SELECT * FROM {menu_router} where path = :path", array(':path' => $path))->fetchAssoc()) {
+      $item['link_path']  = $item['path'];
+      $item['link_title'] = $item['title'];
+      $item['external']   = FALSE;
+      $item['options'] = '';
+      _menu_link_translate($item);
+    }
+  }
+  elseif (strpos($path, '#') === 0) {
+    $item = array('access' => TRUE);
+  }
+  else {
+    $item = menu_get_item($path);
+  }
+  $menu_admin = FALSE;
+  return $item && $item['access'];
 }
