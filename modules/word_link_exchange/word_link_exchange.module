@@ -396,6 +396,7 @@ function word_link_exchange_get_taxonomy_terms($vid, $from, $limit) {
   $query->range($from, $limit);
   $result = $query->fields('t', array('name', 'tid'))->condition('t.vid', $vid)->orderBy('t.tid')->execute();
 
+  $terms = array();
   foreach ($result as $term) {
     $terms[$term->tid] = $term;
   }
@@ -449,7 +450,7 @@ function word_link_exchange_export_form() {
   );
   $form['export']['delimiter'] = array(
     '#type' => 'select',
-    '#title' => t('Delimeter'),
+    '#title' => t('Delimiter'),
     '#options' => $delimiter,
   );
   $form['export']['delimiter_custom'] = array(

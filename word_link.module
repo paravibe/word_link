@@ -407,6 +407,8 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
 
           $url_external = url_is_external($words[$text_lower]->url);
           $url_options = array();
+          $url_path = NULL;
+
           if ($url_external) {
             $url_path = $words[$text_lower]->url;
           }
@@ -568,33 +570,6 @@ function word_link_load($id) {
 }
 
 /**
- * Loads words from the database with pager.
- *
- * @param array $header
- *   (optional) header to build a table.
- * @param int $limit
- *   (optional) determines the number of fields to get.
- *
- * @return mixed
- *   An array of word objects indexed by id.
- */
-function word_link_load_table($header = array(), $limit = NULL) {
-  $words = &drupal_static(__FUNCTION__);
-
-  if (!isset($words)) {
-    $query = db_select('word_link', 'wl')
-      ->extend('PagerDefault')
-      ->limit($limit)
-      ->extend('TableSort')
-      ->orderByHeader($header)
-      ->fields('wl');
-    $words = $query->execute()->fetchAllAssoc('id');
-  }
-
-  return $words;
-}
-
-/**
  * Verify by text if link already exists.
  *
  * @param string $text
@@ -619,8 +594,8 @@ function word_link_exists($text, $id = 0) {
 /**
  * Save word.
  *
- * @param object $word
- *   Word object.
+ * @param array $word
+ *   Word array.
  *
  * @return mixed
  *   If save failed, returns FALSE. If it succeeded,
