@@ -11,7 +11,7 @@ function word_link_install() {
   $t = get_t();
   drupal_set_message(
     $t(
-      'Word Link module succesfully installed. Please configure your text format. Visit the <a href="@link">configuration page</a>.',
+      'Word Link module successfully installed. Please configure your text format. Visit the <a href="@link">configuration page</a>.',
       array(
         '@link' => url('admin/config/content/formats'),
       )
