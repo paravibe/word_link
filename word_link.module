@@ -297,6 +297,7 @@ function word_link_convert_text($words, $text, $settings) {
   $tag = 'a';
 
   // Get disallowed html tags and convert it for Xpath.
+  $disallowed = '';
   if (!empty($settings['word_link_tags_except'])) {
     $disallowed_tags = preg_split('/\s+|<|>/', $settings['word_link_tags_except'], -1, PREG_SPLIT_NO_EMPTY);
     $disallowed = array();
