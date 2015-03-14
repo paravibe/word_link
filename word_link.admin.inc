@@ -178,7 +178,7 @@ function word_link_add_form_validate($form, &$form_state) {
   $values = $form_state['values']['word'];
   if ($form_state['values']['op'] == t('Save')) {
     $normal_path = drupal_get_normal_path($values['url']);
-    if (!drupal_valid_path($normal_path)) {
+    if (!word_link_valid_path($normal_path)) {
       form_set_error('word][url', t("The path '@url' is either invalid or you do not have access to it.", array('@url' => $values['url'])));
     }
     if (!empty($values['class']) && !preg_match('/^[_a-zA-Z]+[_a-zA-Z0-9-\s]*$/', trim($values['class']))) {
