@@ -354,6 +354,19 @@ function word_link_convert_text($text, $settings) {
 
 /**
  * Helper function for converting text.
+ *
+ * @param string $text
+ *   Input text.
+ * @param string $pattern
+ *   Regular expression pattern.
+ * @param array $words
+ *   Array of all words.
+ * @param string $disallowed
+ *   Disallowed tags.
+ * @param array $settings
+ *   Array of filter settings.
+ * @param $tag
+ *   Tag that will be used to replace word.
  */
 function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowed, $settings, $tag) {
   // Create DOM object.
@@ -699,7 +712,7 @@ function word_link_urls_autocomplete_callback($string = "") {
  * @param $dynamic_allowed
  *   Whether paths with menu wildcards (like user/%) should be allowed.
  *
- * @return
+ * @return bool
  *   TRUE if it is a valid path AND the current user has access permission,
  *   FALSE otherwise.
  */
