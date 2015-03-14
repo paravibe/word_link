@@ -203,6 +203,7 @@ function word_link_filter_info() {
     'settings callback' => '_word_link_settings',
     'default settings' => array(
       'word_link_highlight' => FALSE,
+      'word_link_wrap_tag' => NULL,
       'word_link_boundary' => FALSE,
       'word_link_tags_except' => '<h1> <h2> <h3> <h4> <h5> <h6> <code>',
       'word_link_content_types' => array(),
@@ -225,6 +226,13 @@ function _word_link_settings($form, &$form_state, $filter, $format, $defaults) {
     '#title' => t('Highlight words.'),
     '#description' => t('Highlight found words instead of replace it to links.'),
     '#default_value' => $filter->settings['word_link_highlight'],
+  );
+  $settings['word_link_wrap_tag'] = array(
+    '#type' => 'textfield',
+    '#size' => 9,
+    '#title' => t('Wrap HTML tag'),
+    '#description' => t('Enter HTML tag which will be used to wrap word link. Be careful and enter only tag name (e.g. h1).'),
+    '#default_value' => $filter->settings['word_link_wrap_tag'],
   );
   $settings['word_link_boundary'] = array(
     '#type' => 'checkbox',
@@ -434,16 +442,28 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
             unset($attributes['href'], $attributes['target'], $attributes['rel']);
           }
 
-          $link->appendXML(
-            theme(
-              'word_link',
-              array(
-                'text' => $match_text,
-                'tag' => $tag,
-                'attributes' => array_filter($attributes),
-              )
+          $word_link = theme(
+            'word_link',
+            array(
+              'text' => $match_text,
+              'tag' => $tag,
+              'attributes' => array_filter($attributes),
             )
           );
+
+          if (!empty($settings['word_link_wrap_tag'])) {
+            $word_link = theme(
+              'html_tag',
+              array(
+                'element' => array(
+                  '#tag' => $settings['word_link_wrap_tag'],
+                  '#value' => $word_link,
+                ),
+              )
+            );
+          }
+
+          $link->appendXML($word_link);
 
           $parent->insertBefore($link, $next);
           $offset = $match_pos + strlen($match_text);
