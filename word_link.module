@@ -555,9 +555,9 @@ function word_link_load_all($enabled = TRUE) {
  *   A fully-populated word object, or FALSE if the word is not found.
  */
 function word_link_load($id) {
-  $word = &drupal_static(__FUNCTION__);
+  $word = &drupal_static('word_link_load_' . $id);
 
-  if (!isset($words)) {
+  if (!isset($word)) {
     $query = db_select('word_link', 'wl')
       ->fields('wl')
       ->condition('id', $id, '=');
@@ -567,6 +567,27 @@ function word_link_load($id) {
   }
 
   return $word;
+}
+
+function word_link_load_by_url($url) {
+  $url_alias = drupal_get_path_alias($url);
+
+  $query = db_select('word_link', 'wl')
+    ->fields('wl')
+    ->condition(
+      db_or()
+        ->condition('url', $url, '=')
+        ->condition('url', $url_alias, '=')
+    );
+
+  $results = $query->execute();
+
+  $words = array();
+  foreach ($results as $word) {
+    $words[$word->id] = $word;
+  }
+
+  return $words;
 }
 
 /**
@@ -627,6 +648,51 @@ function word_link_delete($id) {
  */
 function word_link_delete_multiple($ids) {
   db_delete('word_link')->condition('id', $ids, 'IN')->execute();
+}
+
+/**
+ * Implements hook_path_delete().
+ */
+function word_link_path_delete($path) {
+  if ($path && isset($path['alias'])) {
+    $words = word_link_load_by_url($path['alias']);
+    word_link_disable_words($words);
+  }
+}
+
+/**
+ * Disable words and set message.
+ *
+ * @param $words
+ *   Array of words objects.
+ */
+function word_link_disable_words($words) {
+  if (empty($words)) {
+    return;
+  }
+
+  $words_list = array();
+  foreach ($words as $word) {
+    if ($word->status) {
+      $word->status = FALSE;
+      word_link_save($word);
+      $words_list[] = l(
+        $word->text,
+        'admin/config/content/word-link/edit/' . $word->id,
+        array(
+          'attributes' => array(
+            'target' => '_blank',
+          ),
+        )
+      );
+    }
+  }
+
+  if ($words_list) {
+    $words_list = theme('item_list', array('items' => $words_list));
+    $message = t('This words has been disabled: !list', array('!list' => $words_list));
+    drupal_set_message($message, 'warning');
+  }
 }
 
 /**
