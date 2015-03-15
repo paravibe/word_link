@@ -661,6 +661,30 @@ function word_link_path_delete($path) {
 }
 
 /**
+ * Implements hook_node_delete().
+ */
+function word_link_node_delete($node) {
+  $words = word_link_load_by_url('node/' . $node->nid);
+  word_link_disable_words($words);
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function word_link_user_delete($account) {
+  $words = word_link_load_by_url('user/' . $account->uid);
+  word_link_disable_words($words);
+}
+
+/**
+ * Implements hook_taxonomy_term_delete().
+ */
+function word_link_taxonomy_term_delete($term) {
+  $words = word_link_load_by_url('taxonomy/term/' . $term->tid);
+  word_link_disable_words($words);
+}
+
+/**
  * Disable words and set message.
  *
  * @param $words
