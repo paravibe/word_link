@@ -691,8 +691,10 @@ function word_link_taxonomy_term_delete($term) {
 /**
  * Disable words and set message.
  *
- * @param $words
+ * @param array $words
  *   Array of words objects.
+ * @param string $type_msg
+ *   Message start type.
  */
 function word_link_disable_words($words, $type_msg) {
   if (empty($words)) {
