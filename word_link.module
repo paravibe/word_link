@@ -737,3 +737,11 @@ function word_link_valid_path($path, $dynamic_allowed = FALSE) {
   $menu_admin = FALSE;
   return $item && $item['access'];
 }
+
+/**
+ * Clear filter cache bin.
+ */
+function word_link_clear_filter_cache() {
+  cache_clear_all('*', 'cache_filter', TRUE);
+  field_cache_clear();
+}

@@ -100,8 +100,7 @@ function word_link_action_add_word_link($text, $weight, $case_sensitive, $url, $
     'rel' => $rel,
   );
   word_link_save($values);
-  cache_clear_all('*', 'cache_filter', TRUE);
-  field_cache_clear();
+  word_link_clear_filter_cache();
 }
 
 /**

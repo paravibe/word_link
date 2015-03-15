@@ -211,8 +211,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
     )
   );
 
-  cache_clear_all('*', 'cache_filter', TRUE);
-  field_cache_clear();
+  word_link_clear_filter_cache();
   $form_state['redirect'] = 'admin/config/content/word-link/list';
 }
 
@@ -254,8 +253,7 @@ function word_link_delete_form_submit($form, &$form_state) {
         )
       )
     );
-    cache_clear_all('*', 'cache_filter', TRUE);
-    field_cache_clear();
+    word_link_clear_filter_cache();
   }
   $form_state['redirect'] = 'admin/config/content/word-link/list';
 }

@@ -19,8 +19,7 @@ function word_link_modify_action($word, $context) {
   }
   word_link_save($word);
   if ($context['progress']['current'] >= $context['progress']['total']) {
-    cache_clear_all('*', 'cache_filter', TRUE);
-    field_cache_clear();
+    word_link_clear_filter_cache();
   }
 }
 
@@ -32,8 +31,7 @@ function word_link_modify_action($word, $context) {
 function word_link_delete_action($word, $context) {
   word_link_delete($word->id);
   if ($context['progress']['current'] >= $context['progress']['total']) {
-    cache_clear_all('*', 'cache_filter', TRUE);
-    field_cache_clear();
+    word_link_clear_filter_cache();
   }
 }
 
@@ -209,7 +207,6 @@ function word_link_disable_invalid_word_action($word, &$context) {
     word_link_save($word);
   }
   if ($context['progress']['current'] >= $context['progress']['total']) {
-    cache_clear_all('*', 'cache_filter', TRUE);
-    field_cache_clear();
+    word_link_clear_filter_cache();
   }
 }
