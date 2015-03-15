@@ -79,7 +79,6 @@ function word_link_schema() {
       ),
       'except_list' => array(
         'type' => 'text',
-        'length' => 255,
         'not null' => TRUE,
       ),
       'weight' => array(
