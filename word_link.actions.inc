@@ -204,7 +204,7 @@ function word_link_modify_action_submit($form, $form_state) {
  * Checks if word URL is valid and if not change word status to disabled.
  */
 function word_link_disable_invalid_word_action($word, &$context) {
-  if (!drupal_valid_path(drupal_get_normal_path($word->url))) {
+  if (!word_link_valid_path(drupal_get_normal_path($word->url))) {
     $word->status = FALSE;
     word_link_save($word);
   }
