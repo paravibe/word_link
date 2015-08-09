@@ -2,7 +2,7 @@
 
 /**
  * @file
- * ThConverts previously defined words to the links.
+ * Converts previously defined words to the links.
  */
 
 require_once 'word_link.actions.inc';

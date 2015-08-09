@@ -37,8 +37,12 @@ function word_link_exchange_menu() {
  * Implements hook_cron().
  */
 function word_link_exchange_cron() {
-  // Sccan public directory for word-link csv files and delete it.
-  $file_list = file_scan_directory('public://', '/word_link_[0-9]{2}_[0-9]{2}_[0-9]{4}T[0-9]{2}_[0-9]{2}(|_[0-9]{1,2}).csv/');
+  // Scan public directory for word-link csv files and deletes it.
+  $file_list = file_scan_directory(
+    'public://',
+    '/word_link_[0-9]{2}_[0-9]{2}_[0-9]{4}T[0-9]{2}_[0-9]{2}(|_[0-9]{1,2}).csv/',
+    array('recurse' => FALSE)
+  );
   if (!empty($file_list)) {
     foreach ($file_list as $file) {
       file_unmanaged_delete($file->uri);
