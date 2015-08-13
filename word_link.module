@@ -778,18 +778,21 @@ function word_link_urls_autocomplete_callback($string = "") {
     $user_query->range(0, 10);
     $users = $user_query->execute()->fetchAllAssoc('id');
 
-    $term_query = db_select('taxonomy_term_data', 't');
-    $term_query->addField('t', 'tid', 'id');
-    $term_query->addField('t', 'name', 'string');
-    $term_query->condition('t.name', db_like($string) . '%', 'LIKE');
-    $term_query->range(0, 10);
-    $terms = $term_query->execute()->fetchAllAssoc('id');
-
     $results = array(
       'node' => $nodes,
       'user' => $users,
-      'taxonomy/term' => $terms,
     );
+
+    if (module_exists('taxonomy')) {
+      $term_query = db_select('taxonomy_term_data', 't');
+      $term_query->addField('t', 'tid', 'id');
+      $term_query->addField('t', 'name', 'string');
+      $term_query->condition('t.name', db_like($string) . '%', 'LIKE');
+      $term_query->range(0, 10);
+      $terms = $term_query->execute()->fetchAllAssoc('id');
+
+      $results['taxonomy/term'] = $terms;
+    }
 
     foreach ($results as $path => $items) {
       foreach ($items as $item) {
