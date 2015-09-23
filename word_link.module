@@ -421,13 +421,15 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
             $url_options = array(
               'query' => $url_query,
               'fragment' => isset($url_parts['fragment']) ? $url_parts['fragment'] : '',
-              'external' => TRUE,
             );
 
             if (empty($url_parts['path'])) {
               // Assuming that URL starts with #.
               $url_options['external'] = TRUE;
               $url_path = NULL;
+            }
+            else {
+              $url_path = $url_parts['path'];
             }
           }
 
