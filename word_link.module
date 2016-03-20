@@ -382,7 +382,7 @@ function word_link_convert_text($text, $settings) {
  *   Disallowed tags.
  * @param array $settings
  *   Array of filter settings.
- * @param $tag
+ * @param string $tag
  *   Tag that will be used to replace word.
  */
 function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowed, $settings, $tag) {
@@ -843,9 +843,9 @@ function word_link_urls_autocomplete_callback($string = "") {
 /**
  * Checks a path exists and the current user has access to it.
  *
- * @param $path
+ * @param string $path
  *   The path to check.
- * @param $dynamic_allowed
+ * @param bool $dynamic_allowed
  *   Whether paths with menu wildcards (like user/%) should be allowed.
  *
  * @return bool
@@ -860,7 +860,8 @@ function word_link_valid_path($path, $dynamic_allowed = FALSE) {
     $item = array('access' => TRUE);
   }
   elseif ($dynamic_allowed && preg_match('/\/\%/', $path)) {
-    // Path is dynamic (ie 'user/%'), so check directly against menu_router table.
+    // Path is dynamic (ie 'user/%'),
+    // so check directly against menu_router table.
     if ($item = db_query("SELECT * FROM {menu_router} where path = :path", array(':path' => $path))->fetchAssoc()) {
       $item['link_path']  = $item['path'];
       $item['link_title'] = $item['title'];

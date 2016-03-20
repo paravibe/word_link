@@ -15,8 +15,8 @@ function word_link_admin_settings() {
     '#description' => t('If turned on default CSS from module will be added.'),
     '#default_value' => variable_get('word_link_add_css', 1),
   );
-  
-    // Default settings for add word form
+
+  // Default settings for add word form.
   $form['defaults'] = array(
     '#type' => 'fieldset',
     '#title' => t('Default values'),
