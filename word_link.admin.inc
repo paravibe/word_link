@@ -211,6 +211,7 @@ function word_link_add_form_save_submit($form, &$form_state) {
     )
   );
 
+  word_link_clear_word_cache($word->id);
   word_link_clear_filter_cache();
   $form_state['redirect'] = 'admin/config/content/word-link/list';
 }
