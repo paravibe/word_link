@@ -303,7 +303,7 @@ function word_link_exchange_import_from_file($values, $update, $case_sensitive, 
   foreach ($values as $value) {
     $value['case_sensitive'] = $case_sensitive !== 'default' ? $case_sensitive : $value['case_sensitive'];
     $exist = word_link_exists($value['text']);
-    $value['except_list'] = str_replace('|', "\n", str_replace('"', '', trim($value['except'])));
+    $value['except_list'] = str_replace('|', "\n", str_replace('"', '', trim($value['except_list'])));
     word_link_save($value);
     if (!$exist) {
       $context['results']['created']++;
