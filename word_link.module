@@ -288,8 +288,7 @@ function word_link_convert_text($text, $settings) {
   // in which need to convert words.
   // @todo: Need to check when node shows on another path.
   if (isset($args[0]) && $args[0] == 'node' && isset($args[1])) {
-    $nodes = word_link_get_node_types();
-    $type = isset($nodes[$args[1]]) ? $nodes[$args[1]]->type : NULL;
+    $type = word_link_get_node_type($args[1]);
 
     if (empty($settings['word_link_content_types'][$type])) {
       return $text;
@@ -512,22 +511,26 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
 }
 
 /**
- * Gets all nodes and their types.
+ * Gets node type by nid.
  *
- * @return mixed
- *   Array of nodes indexed by nid.
+ * @param integer $nid
+ *   Node's nid.
+ *
+ * @return string
+ *   Node's type.
  */
-function word_link_get_node_types() {
-  $nodes = &drupal_static(__FUNCTION__);
+function word_link_get_node_type($nid) {
+  $type = &drupal_static(__FUNCTION__ . '_' . $nid);
 
-  if (!isset($nodes)) {
+  if (!isset($type)) {
     $query = db_select('node', 'n')
-      ->fields('n', array('nid', 'type'));
+      ->fields('n', array('type'))
+      ->condition('n.nid', $nid);
 
-    $nodes = $query->execute()->fetchAllAssoc('nid');
+    $type = $query->execute()->fetchField();
   }
 
-  return $nodes;
+  return $type;
 }
 
 /**
