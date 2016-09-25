@@ -513,7 +513,7 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
 /**
  * Gets node type by nid.
  *
- * @param integer $nid
+ * @param int $nid
  *   Node's nid.
  *
  * @return string
@@ -602,6 +602,15 @@ function word_link_load($id) {
   return $word;
 }
 
+/**
+ * Loads word links by URL.
+ *
+ * @param string $url
+ *   Url string.
+ *
+ * @return array
+ *   Array with word link objects.
+ */
 function word_link_load_by_url($url) {
   $url_alias = drupal_get_path_alias($url);
 
@@ -631,7 +640,7 @@ function word_link_load_by_url($url) {
  * @param int $id
  *   (optional) ID of the word.
  *
- * @return bool
+ * @return object
  *   Returns the word object if exist or FALSE if not.
  */
 function word_link_exists($text, $id = 0) {
