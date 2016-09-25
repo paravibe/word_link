@@ -406,6 +406,7 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
         $match_pos = $match[1];
         $text_lower = drupal_strtolower($match_text);
         $word = $words[$text_lower];
+        $word_cache_id = $word->id . '_' . md5($match_text);
 
         if (($word->case_sensitive && $word->text == $match_text) || !$word->case_sensitive) {
           $prefix = substr($text, $offset, $match_pos - $offset);
@@ -414,9 +415,9 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
           $link = $dom->createDocumentFragment();
 
           $word_link_rendered = &drupal_static('word_link_rendered');
-          if (!isset($word_link_rendered[$word->id])) {
-            if ($cache = cache_get('word_link_rendered_' . $word->id)) {
-              $word_link_rendered[$word->id] = $cache->data;
+          if (!isset($word_link_rendered[$word_cache_id])) {
+            if ($cache = cache_get('word_link_rendered_' . $word_cache_id)) {
+              $word_link_rendered[$word_cache_id] = $cache->data;
             }
             else {
               $target = url_is_external($word->url) ? '_blank' : '';
@@ -462,7 +463,7 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
                 unset($attributes['href'], $attributes['target'], $attributes['rel']);
               }
 
-              $word_link_rendered[$word->id] = theme(
+              $word_link_rendered[$word_cache_id] = theme(
                 'word_link',
                 array(
                   'text' => $match_text,
@@ -472,22 +473,22 @@ function word_link_convert_text_recursively(&$text, $pattern, $words, $disallowe
               );
 
               if (!empty($settings['word_link_wrap_tag'])) {
-                $word_link_rendered[$word->id] = theme(
+                $word_link_rendered[$word_cache_id] = theme(
                   'html_tag',
                   array(
                     'element' => array(
                       '#tag' => $settings['word_link_wrap_tag'],
-                      '#value' => $word_link_rendered[$word->id],
+                      '#value' => $word_link_rendered[$word_cache_id],
                     ),
                   )
                 );
               }
 
-              cache_set('word_link_rendered_' . $word->id, $word_link_rendered[$word->id], 'cache');
+              cache_set('word_link_rendered_' . $word_cache_id, $word_link_rendered[$word_cache_id], 'cache');
             }
           }
 
-          $link->appendXML($word_link_rendered[$word->id]);
+          $link->appendXML($word_link_rendered[$word_cache_id]);
 
           $parent->insertBefore($link, $next);
           $offset = $match_pos + strlen($match_text);
@@ -678,9 +679,8 @@ function word_link_delete($id) {
 function word_link_delete_multiple($ids) {
   db_delete('word_link')->condition('id', $ids, 'IN')->execute();
 
-  cache_clear_all('word_link_words', 'cache');
   foreach ($ids as $id) {
-    cache_clear_all('word_link_rendered_' . $id, 'cache');
+    word_link_clear_word_cache($id);
   }
 }
 
@@ -894,6 +894,6 @@ function word_link_clear_filter_cache() {
 function word_link_clear_word_cache($id = NULL) {
   cache_clear_all('word_link_words', 'cache');
   if (!empty($id)) {
-    cache_clear_all('word_link_rendered_' . $id, 'cache');
+    cache_clear_all('word_link_rendered_' . $id, 'cache', TRUE);
   }
 }
